@@ -1,1 +1,40 @@
-testing commit - this app will serve as mechanism to connect to content DB
+# Databricks Content Info Client
+
+Python utility for querying the `content_info` table via Databricks SQL Warehouses.
+
+## Features
+- Typed configuration via `pydantic`
+- Connection management with retries
+- Repository + service layers
+- CLI for single, bulk, search, poster streaming, and safe-zone analysis
+- Simple caching layer to reduce repeated lookups
+
+## Setup
+1. Create and activate a virtual environment.
+2. `pip install -r requirements.txt`
+3. Copy `.env.example` to `.env` and set:
+   - `DATABRICKS_HOST`
+   - `DATABRICKS_HTTP_PATH`
+   - `DATABRICKS_TOKEN`
+   - `DATABRICKS_CATALOG`
+   - `DATABRICKS_SCHEMA`
+   - `DATABRICKS_CONTENT_TABLE` (defaults to `content_info`)
+4. Run `python main.py get <content_id>` to fetch records.
+5. (Optional) Configure a vision model for safe-zone analysis:
+   - `OPENAI_API_KEY` (current implementation)
+   - `OPENAI_MODEL` (defaults to `gpt-4o-mini`)
+6. Stream poster URLs for Gemini safe-zone validation via:
+   ```
+   python main.py posters --batch-size 500 --include-inactive --limit 10
+   ```
+   (Sample output format available in `examples/posters_sample.jsonl`.)
+7. Run safe-zone analysis through OpenAI vision models (requires `OPENAI_API_KEY` with vision access):
+   ```
+   python main.py analyze-posters --limit 5 --provider openai --json-array
+   ```
+   Writes either NDJSON (default) or a JSON array describing each poster’s top/bottom safe-zone status. Example responses live in `examples/analysis_sample.jsonl`.
+
+## Testing
+```
+pytest
+```

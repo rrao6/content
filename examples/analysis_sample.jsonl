@@ -1,0 +1,3 @@
+{"content_id": 1001, "poster_img_url": "https://sample.tubi/img/1001.jpg", "analysis": {"top_safe_zone": {"contains_key_elements": true, "confidence": 92, "justification": "Title text overlaps the top safe zone."}, "bottom_safe_zone": {"contains_key_elements": false, "confidence": 94, "justification": "Credits remain above the bottom safe zone."}}, "error": null}
+{"content_id": 1002, "poster_img_url": "https://sample.tubi/img/1002.jpg", "analysis": {"top_safe_zone": {"contains_key_elements": false, "confidence": 90, "justification": "Only background sky appears in the top zone."}, "bottom_safe_zone": {"contains_key_elements": true, "confidence": 85, "justification": "Tagline text is partially inside the bottom zone."}}, "error": null}
+

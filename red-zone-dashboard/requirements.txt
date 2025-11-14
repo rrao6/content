@@ -1,0 +1,19 @@
+# Flask web framework
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# Database
+# SQLite is included with Python
+
+# Utilities
+python-dotenv>=1.0.0
+
+# Production server (optional)
+gunicorn>=21.2.0
+
+# PDF generation (for export feature)
+reportlab>=4.0.0
+
+# Parent project dependencies (if running integrated)
+# Uncomment if you want to install the main project deps too
+# -r ../requirements.txt

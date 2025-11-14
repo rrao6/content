@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+
+{% block title %}{{ result.title or 'Poster' }} - Red Zone Analysis{% endblock %}
+
+{% block content %}
+<div class="px-4 py-5 sm:px-6">
+    <!-- Back Button -->
+    <div class="mb-6">
+        <a href="{{ url_for('results', run_id=result.run_id) }}" 
+           class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Back to Results
+        </a>
+    </div>
+    
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Poster Image Column -->
+        <div>
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div class="poster-container bg-gray-100">
+                    {% if result.poster_url %}
+                    <img src="{{ url_for('proxy_image', url=result.poster_url) }}" 
+                         alt="{{ result.title }}"
+                         class="poster-image"
+                         id="posterImage"
+                         data-original-url="{{ result.poster_url }}"
+                         onerror="handleImageError(this)">
+                    <div class="red-zone-overlay"></div>
+                    {% else %}
+                    <div class="flex items-center justify-center h-full text-gray-400">
+                        <i class="fas fa-image text-6xl"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Image Actions -->
+                <div class="p-4 bg-gray-50 flex justify-center space-x-4">
+                    <button onclick="toggleRedZone()" 
+                            class="text-sm text-gray-600 hover:text-gray-900">
+                        <i class="fas fa-eye mr-1"></i>
+                        Toggle Red Zone
+                    </button>
+                    <button onclick="downloadImage()" 
+                            class="text-sm text-gray-600 hover:text-gray-900">
+                        <i class="fas fa-download mr-1"></i>
+                        Download
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Analysis Details Column -->
+        <div>
+            <!-- Title and Status -->
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <h1 class="text-2xl font-bold text-gray-900 mb-4">
+                    {{ result.title or 'Untitled' }}
+                </h1>
+                
+                <!-- Status Badge -->
+                <div class="flex items-center mb-4">
+                    {% if result.has_elements %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-lg font-medium bg-red-100 text-red-800">
+                        <i class="fas fa-times-circle mr-2"></i> FAIL
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-lg font-medium bg-green-100 text-green-800">
+                        <i class="fas fa-check-circle mr-2"></i> PASS
+                    </span>
+                    {% endif %}
+                    
+                    <div class="ml-4">
+                        <span class="text-lg font-semibold text-gray-900">{{ result.confidence }}%</span>
+                        <span class="text-sm text-gray-500">confidence</span>
+                    </div>
+                </div>
+                
+                <!-- Metadata Grid -->
+                <dl class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <dt class="text-gray-500">Content ID</dt>
+                        <dd class="font-medium text-gray-900 font-mono">{{ result.content_id }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-gray-500">Program ID</dt>
+                        <dd class="font-medium text-gray-900 font-mono">{{ result.program_id or 'N/A' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-gray-500">Content Type</dt>
+                        <dd class="font-medium text-gray-900">{{ result.content_type|capitalize or 'Unknown' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-gray-500">Source of Truth</dt>
+                        <dd class="font-medium text-gray-900">{{ result.sot_name|upper }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-gray-500">Analysis Date</dt>
+                        <dd class="font-medium text-gray-900">{{ result.created_at|format_datetime }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-gray-500">Run ID</dt>
+                        <dd class="font-medium text-gray-900">#{{ result.run_id }}</dd>
+                    </div>
+                </dl>
+                
+                <!-- Poster URL -->
+                <div class="mt-4 pt-4 border-t">
+                    <dt class="text-gray-500 text-sm">Poster URL</dt>
+                    <dd class="mt-1">
+                        <div class="flex items-center space-x-2">
+                            <code class="text-xs bg-gray-100 px-2 py-1 rounded flex-1 overflow-hidden text-ellipsis">
+                                {{ result.poster_url }}
+                            </code>
+                            <button onclick="copyToClipboard('{{ result.poster_url }}')" 
+                                    class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </dd>
+                </div>
+            </div>
+            
+            <!-- AI Analysis -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-robot mr-2"></i>
+                    AI Analysis
+                </h2>
+                
+                <!-- Justification -->
+                <div class="mb-4">
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">Justification</h3>
+                    <p class="text-gray-600 bg-gray-50 p-3 rounded">
+                        {{ result.justification or 'No justification provided.' }}
+                    </p>
+                </div>
+                
+                {% if result.analysis_json %}
+                <!-- Analysis Details -->
+                <div class="mb-4">
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">Full Analysis Details</h3>
+                    {% set analysis_data = result.analysis_json|from_json if result.analysis_json is string else result.analysis %}
+                    
+                    {% if analysis_data %}
+                    <div class="space-y-3">
+                        <!-- Red Zone Result -->
+                        {% set red_zone = analysis_data.get('red_safe_zone', {}) %}
+                        <div class="bg-gray-50 p-3 rounded">
+                            <h4 class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Red Zone Analysis</h4>
+                            <dl class="space-y-1 text-sm">
+                                <div class="flex justify-between">
+                                    <dt class="text-gray-500">Contains Key Elements:</dt>
+                                    <dd class="font-medium">
+                                        {% if red_zone.contains_key_elements %}
+                                        <span class="text-red-600">Yes (FAIL)</span>
+                                        {% else %}
+                                        <span class="text-green-600">No (PASS)</span>
+                                        {% endif %}
+                                    </dd>
+                                </div>
+                                <div class="flex justify-between">
+                                    <dt class="text-gray-500">Confidence:</dt>
+                                    <dd class="font-medium">{{ red_zone.confidence }}%</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        
+                        <!-- Model Info -->
+                        {% if analysis_data.get('model') %}
+                        <div class="bg-gray-50 p-3 rounded">
+                            <h4 class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Model Information</h4>
+                            <dl class="space-y-1 text-sm">
+                                <div class="flex justify-between">
+                                    <dt class="text-gray-500">Model:</dt>
+                                    <dd class="font-medium">{{ analysis_data.model }}</dd>
+                                </div>
+                                {% if analysis_data.get('processing_time') %}
+                                <div class="flex justify-between">
+                                    <dt class="text-gray-500">Processing Time:</dt>
+                                    <dd class="font-medium">{{ analysis_data.processing_time }}s</dd>
+                                </div>
+                                {% endif %}
+                            </dl>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Raw JSON (collapsible) -->
+                        <details class="bg-gray-50 rounded">
+                            <summary class="p-3 cursor-pointer text-sm font-medium text-gray-700 hover:bg-gray-100">
+                                View Raw JSON
+                            </summary>
+                            <div class="p-3 border-t">
+                                <pre class="text-xs text-gray-600 overflow-x-auto">{{ analysis_data|tojson(indent=2) }}</pre>
+                            </div>
+                        </details>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <!-- Visual Guide -->
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <h3 class="text-sm font-medium text-blue-900 mb-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Red Zone Definition
+                    </h3>
+                    <p class="text-sm text-blue-700">
+                        The red zone covers 60% of the poster width and 10% of the height, 
+                        positioned in the top-left corner. Key elements (text and human faces) 
+                        detected in this zone will cause the poster to fail the analysis.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="mt-6 flex space-x-4">
+                <button onclick="shareResult()" 
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="fas fa-share mr-2"></i>
+                    Share Result
+                </button>
+                <button onclick="reportIssue()" 
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                    <i class="fas fa-flag mr-2"></i>
+                    Report Issue
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let redZoneVisible = true;
+    
+    // Toggle red zone overlay
+    function toggleRedZone() {
+        const overlay = document.querySelector('.red-zone-overlay');
+        if (overlay) {
+            redZoneVisible = !redZoneVisible;
+            overlay.style.display = redZoneVisible ? 'block' : 'none';
+        }
+    }
+    
+    // Download image with red zone
+    function downloadImage() {
+        const img = document.getElementById('posterImage');
+        if (!img) return;
+        
+        // Create canvas
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size to match image aspect ratio
+        const aspectRatio = 9/16;
+        canvas.width = 600;
+        canvas.height = canvas.width / aspectRatio;
+        
+        // Draw image
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        // Draw red zone if visible
+        if (redZoneVisible) {
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 3;
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.2)';
+            
+            const zoneWidth = canvas.width * 0.6;
+            const zoneHeight = canvas.height * 0.1;
+            
+            ctx.fillRect(0, 0, zoneWidth, zoneHeight);
+            ctx.strokeRect(0, 0, zoneWidth, zoneHeight);
+        }
+        
+        // Download
+        canvas.toBlob(function(blob) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `red_zone_analysis_{{ result.content_id }}.png`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    }
+    
+    // Share result
+    function shareResult() {
+        const url = window.location.href;
+        copyToClipboard(url);
+        showToast('Link copied to clipboard!');
+    }
+    
+    // Report issue
+    function reportIssue() {
+        const subject = encodeURIComponent(`Red Zone Analysis Issue - Content ID {{ result.content_id }}`);
+        const body = encodeURIComponent(`
+Issue with analysis for: {{ result.title }}
+Content ID: {{ result.content_id }}
+Analysis Result: {{ 'FAIL' if result.has_elements else 'PASS' }}
+
+Please describe the issue:
+
+        `);
+        
+        window.location.href = `mailto:redzone-support@tubi.tv?subject=${subject}&body=${body}`;
+    }
+</script>
+{% endblock %}

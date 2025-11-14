@@ -1,0 +1,1502 @@
+[
+  {
+    "content_id": 200000,
+    "program_id": 300000,
+    "content_name": "Test Content 0000",
+    "content_type": "series",
+    "sot_name": "leaving_soon",
+    "poster_img_url": "https://img.adrise.tv/test_0000.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 86,
+        "justification": "All text elements are outside the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200001,
+    "program_id": 300001,
+    "content_name": "Test Content 0001",
+    "content_type": "movie",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0001.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 89,
+        "justification": "Title text clearly visible in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200002,
+    "program_id": 300002,
+    "content_name": "Test Content 0002",
+    "content_type": "movie",
+    "sot_name": "leaving_soon",
+    "poster_img_url": "https://img.adrise.tv/test_0002.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 97,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200003,
+    "program_id": 300003,
+    "content_name": "Test Content 0003",
+    "content_type": "series",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0003.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 94,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200004,
+    "program_id": 300004,
+    "content_name": "Test Content 0004",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0004.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 90,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200005,
+    "program_id": 300005,
+    "content_name": "Test Content 0005",
+    "content_type": "movie",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0005.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 94,
+        "justification": "Title text clearly visible in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200006,
+    "program_id": 300006,
+    "content_name": "Test Content 0006",
+    "content_type": "series",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0006.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 96,
+        "justification": "Title text clearly visible in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200007,
+    "program_id": 300007,
+    "content_name": "Test Content 0007",
+    "content_type": "movie",
+    "sot_name": "leaving_soon",
+    "poster_img_url": "https://img.adrise.tv/test_0007.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 98,
+        "justification": "Logo and tagline overlap with red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200008,
+    "program_id": 300008,
+    "content_name": "Test Content 0008",
+    "content_type": "movie",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0008.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 88,
+        "justification": "No text or faces detected in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200009,
+    "program_id": 300009,
+    "content_name": "Test Content 0009",
+    "content_type": "series",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0009.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 90,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200010,
+    "program_id": 300010,
+    "content_name": "Test Content 0010",
+    "content_type": "movie",
+    "sot_name": "most_popular",
+    "poster_img_url": "https://img.adrise.tv/test_0010.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 98,
+        "justification": "Title text clearly visible in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200011,
+    "program_id": 300011,
+    "content_name": "Test Content 0011",
+    "content_type": "movie",
+    "sot_name": "leaving_soon",
+    "poster_img_url": "https://img.adrise.tv/test_0011.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 98,
+        "justification": "Title text clearly visible in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200012,
+    "program_id": 300012,
+    "content_name": "Test Content 0012",
+    "content_type": "series",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0012.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 86,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200013,
+    "program_id": 300013,
+    "content_name": "Test Content 0013",
+    "content_type": "movie",
+    "sot_name": "most_popular",
+    "poster_img_url": "https://img.adrise.tv/test_0013.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 95,
+        "justification": "Logo and tagline overlap with red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200014,
+    "program_id": 300014,
+    "content_name": "Test Content 0014",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0014.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 91,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200015,
+    "program_id": 300015,
+    "content_name": "Test Content 0015",
+    "content_type": "series",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0015.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 85,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200016,
+    "program_id": 300016,
+    "content_name": "Test Content 0016",
+    "content_type": "movie",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0016.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 94,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200017,
+    "program_id": 300017,
+    "content_name": "Test Content 0017",
+    "content_type": "movie",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0017.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 88,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200018,
+    "program_id": 300018,
+    "content_name": "Test Content 0018",
+    "content_type": "series",
+    "sot_name": "most_popular",
+    "poster_img_url": "https://img.adrise.tv/test_0018.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 98,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200019,
+    "program_id": 300019,
+    "content_name": "Test Content 0019",
+    "content_type": "movie",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0019.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 99,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200020,
+    "program_id": 300020,
+    "content_name": "Test Content 0020",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0020.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 92,
+        "justification": "Logo and tagline overlap with red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200021,
+    "program_id": 300021,
+    "content_name": "Test Content 0021",
+    "content_type": "series",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0021.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 87,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200022,
+    "program_id": 300022,
+    "content_name": "Test Content 0022",
+    "content_type": "movie",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0022.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 87,
+        "justification": "Red zone is clear of key elements"
+      }
+    }
+  },
+  {
+    "content_id": 200023,
+    "program_id": 300023,
+    "content_name": "Test Content 0023",
+    "content_type": "movie",
+    "sot_name": "leaving_soon",
+    "poster_img_url": "https://img.adrise.tv/test_0023.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 98,
+        "justification": "No text or faces detected in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200024,
+    "program_id": 300024,
+    "content_name": "Test Content 0024",
+    "content_type": "series",
+    "sot_name": "leaving_soon",
+    "poster_img_url": "https://img.adrise.tv/test_0024.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 99,
+        "justification": "Red zone is clear of key elements"
+      }
+    }
+  },
+  {
+    "content_id": 200025,
+    "program_id": 300025,
+    "content_name": "Test Content 0025",
+    "content_type": "movie",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0025.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 98,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200026,
+    "program_id": 300026,
+    "content_name": "Test Content 0026",
+    "content_type": "movie",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0026.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 89,
+        "justification": "Logo and tagline overlap with red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200027,
+    "program_id": 300027,
+    "content_name": "Test Content 0027",
+    "content_type": "series",
+    "sot_name": "leaving_soon",
+    "poster_img_url": "https://img.adrise.tv/test_0027.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 93,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200028,
+    "program_id": 300028,
+    "content_name": "Test Content 0028",
+    "content_type": "movie",
+    "sot_name": "leaving_soon",
+    "poster_img_url": "https://img.adrise.tv/test_0028.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 96,
+        "justification": "No text or faces detected in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200029,
+    "program_id": 300029,
+    "content_name": "Test Content 0029",
+    "content_type": "movie",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0029.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 99,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200030,
+    "program_id": 300030,
+    "content_name": "Test Content 0030",
+    "content_type": "series",
+    "sot_name": "most_popular",
+    "poster_img_url": "https://img.adrise.tv/test_0030.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 98,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200031,
+    "program_id": 300031,
+    "content_name": "Test Content 0031",
+    "content_type": "movie",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0031.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 96,
+        "justification": "Logo and tagline overlap with red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200032,
+    "program_id": 300032,
+    "content_name": "Test Content 0032",
+    "content_type": "movie",
+    "sot_name": "most_popular",
+    "poster_img_url": "https://img.adrise.tv/test_0032.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 94,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200033,
+    "program_id": 300033,
+    "content_name": "Test Content 0033",
+    "content_type": "series",
+    "sot_name": "most_popular",
+    "poster_img_url": "https://img.adrise.tv/test_0033.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 90,
+        "justification": "Red zone is clear of key elements"
+      }
+    }
+  },
+  {
+    "content_id": 200034,
+    "program_id": 300034,
+    "content_name": "Test Content 0034",
+    "content_type": "movie",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0034.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 97,
+        "justification": "All text elements are outside the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200035,
+    "program_id": 300035,
+    "content_name": "Test Content 0035",
+    "content_type": "movie",
+    "sot_name": "leaving_soon",
+    "poster_img_url": "https://img.adrise.tv/test_0035.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 89,
+        "justification": "Title text clearly visible in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200036,
+    "program_id": 300036,
+    "content_name": "Test Content 0036",
+    "content_type": "series",
+    "sot_name": "leaving_soon",
+    "poster_img_url": "https://img.adrise.tv/test_0036.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 97,
+        "justification": "No text or faces detected in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200037,
+    "program_id": 300037,
+    "content_name": "Test Content 0037",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0037.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 93,
+        "justification": "Red zone is clear of key elements"
+      }
+    }
+  },
+  {
+    "content_id": 200038,
+    "program_id": 300038,
+    "content_name": "Test Content 0038",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0038.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 97,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200039,
+    "program_id": 300039,
+    "content_name": "Test Content 0039",
+    "content_type": "series",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0039.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 97,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200040,
+    "program_id": 300040,
+    "content_name": "Test Content 0040",
+    "content_type": "movie",
+    "sot_name": "most_popular",
+    "poster_img_url": "https://img.adrise.tv/test_0040.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 90,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200041,
+    "program_id": 300041,
+    "content_name": "Test Content 0041",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0041.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 94,
+        "justification": "Logo and tagline overlap with red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200042,
+    "program_id": 300042,
+    "content_name": "Test Content 0042",
+    "content_type": "series",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0042.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 86,
+        "justification": "No text or faces detected in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200043,
+    "program_id": 300043,
+    "content_name": "Test Content 0043",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0043.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 98,
+        "justification": "Title text clearly visible in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200044,
+    "program_id": 300044,
+    "content_name": "Test Content 0044",
+    "content_type": "movie",
+    "sot_name": "leaving_soon",
+    "poster_img_url": "https://img.adrise.tv/test_0044.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 93,
+        "justification": "Logo and tagline overlap with red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200045,
+    "program_id": 300045,
+    "content_name": "Test Content 0045",
+    "content_type": "series",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0045.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 85,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200046,
+    "program_id": 300046,
+    "content_name": "Test Content 0046",
+    "content_type": "movie",
+    "sot_name": "leaving_soon",
+    "poster_img_url": "https://img.adrise.tv/test_0046.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 98,
+        "justification": "Red zone is clear of key elements"
+      }
+    }
+  },
+  {
+    "content_id": 200047,
+    "program_id": 300047,
+    "content_name": "Test Content 0047",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0047.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 88,
+        "justification": "Logo and tagline overlap with red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200048,
+    "program_id": 300048,
+    "content_name": "Test Content 0048",
+    "content_type": "series",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0048.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 92,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200049,
+    "program_id": 300049,
+    "content_name": "Test Content 0049",
+    "content_type": "movie",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0049.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 98,
+        "justification": "Logo and tagline overlap with red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200050,
+    "program_id": 300050,
+    "content_name": "Test Content 0050",
+    "content_type": "movie",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0050.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 98,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200051,
+    "program_id": 300051,
+    "content_name": "Test Content 0051",
+    "content_type": "series",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0051.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 93,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200052,
+    "program_id": 300052,
+    "content_name": "Test Content 0052",
+    "content_type": "movie",
+    "sot_name": "most_popular",
+    "poster_img_url": "https://img.adrise.tv/test_0052.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 87,
+        "justification": "Title text clearly visible in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200053,
+    "program_id": 300053,
+    "content_name": "Test Content 0053",
+    "content_type": "movie",
+    "sot_name": "most_popular",
+    "poster_img_url": "https://img.adrise.tv/test_0053.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 99,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200054,
+    "program_id": 300054,
+    "content_name": "Test Content 0054",
+    "content_type": "series",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0054.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 94,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200055,
+    "program_id": 300055,
+    "content_name": "Test Content 0055",
+    "content_type": "movie",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0055.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 97,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200056,
+    "program_id": 300056,
+    "content_name": "Test Content 0056",
+    "content_type": "movie",
+    "sot_name": "most_popular",
+    "poster_img_url": "https://img.adrise.tv/test_0056.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 88,
+        "justification": "Logo and tagline overlap with red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200057,
+    "program_id": 300057,
+    "content_name": "Test Content 0057",
+    "content_type": "series",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0057.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 99,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200058,
+    "program_id": 300058,
+    "content_name": "Test Content 0058",
+    "content_type": "movie",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0058.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 97,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200059,
+    "program_id": 300059,
+    "content_name": "Test Content 0059",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0059.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 91,
+        "justification": "All text elements are outside the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200060,
+    "program_id": 300060,
+    "content_name": "Test Content 0060",
+    "content_type": "series",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0060.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 96,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200061,
+    "program_id": 300061,
+    "content_name": "Test Content 0061",
+    "content_type": "movie",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0061.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 95,
+        "justification": "All text elements are outside the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200062,
+    "program_id": 300062,
+    "content_name": "Test Content 0062",
+    "content_type": "movie",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0062.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 87,
+        "justification": "Logo and tagline overlap with red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200063,
+    "program_id": 300063,
+    "content_name": "Test Content 0063",
+    "content_type": "series",
+    "sot_name": "leaving_soon",
+    "poster_img_url": "https://img.adrise.tv/test_0063.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 97,
+        "justification": "Red zone is clear of key elements"
+      }
+    }
+  },
+  {
+    "content_id": 200064,
+    "program_id": 300064,
+    "content_name": "Test Content 0064",
+    "content_type": "movie",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0064.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 95,
+        "justification": "Title text clearly visible in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200065,
+    "program_id": 300065,
+    "content_name": "Test Content 0065",
+    "content_type": "movie",
+    "sot_name": "most_popular",
+    "poster_img_url": "https://img.adrise.tv/test_0065.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 96,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200066,
+    "program_id": 300066,
+    "content_name": "Test Content 0066",
+    "content_type": "series",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0066.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 93,
+        "justification": "Title text clearly visible in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200067,
+    "program_id": 300067,
+    "content_name": "Test Content 0067",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0067.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 90,
+        "justification": "Logo and tagline overlap with red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200068,
+    "program_id": 300068,
+    "content_name": "Test Content 0068",
+    "content_type": "movie",
+    "sot_name": "most_popular",
+    "poster_img_url": "https://img.adrise.tv/test_0068.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 93,
+        "justification": "No text or faces detected in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200069,
+    "program_id": 300069,
+    "content_name": "Test Content 0069",
+    "content_type": "series",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0069.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 99,
+        "justification": "Title text clearly visible in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200070,
+    "program_id": 300070,
+    "content_name": "Test Content 0070",
+    "content_type": "movie",
+    "sot_name": "most_popular",
+    "poster_img_url": "https://img.adrise.tv/test_0070.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 87,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200071,
+    "program_id": 300071,
+    "content_name": "Test Content 0071",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0071.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 86,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200072,
+    "program_id": 300072,
+    "content_name": "Test Content 0072",
+    "content_type": "series",
+    "sot_name": "most_popular",
+    "poster_img_url": "https://img.adrise.tv/test_0072.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 97,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200073,
+    "program_id": 300073,
+    "content_name": "Test Content 0073",
+    "content_type": "movie",
+    "sot_name": "leaving_soon",
+    "poster_img_url": "https://img.adrise.tv/test_0073.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 94,
+        "justification": "Red zone is clear of key elements"
+      }
+    }
+  },
+  {
+    "content_id": 200074,
+    "program_id": 300074,
+    "content_name": "Test Content 0074",
+    "content_type": "movie",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0074.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 91,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200075,
+    "program_id": 300075,
+    "content_name": "Test Content 0075",
+    "content_type": "series",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0075.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 93,
+        "justification": "Red zone is clear of key elements"
+      }
+    }
+  },
+  {
+    "content_id": 200076,
+    "program_id": 300076,
+    "content_name": "Test Content 0076",
+    "content_type": "movie",
+    "sot_name": "leaving_soon",
+    "poster_img_url": "https://img.adrise.tv/test_0076.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 96,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200077,
+    "program_id": 300077,
+    "content_name": "Test Content 0077",
+    "content_type": "movie",
+    "sot_name": "leaving_soon",
+    "poster_img_url": "https://img.adrise.tv/test_0077.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 86,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200078,
+    "program_id": 300078,
+    "content_name": "Test Content 0078",
+    "content_type": "series",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0078.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 92,
+        "justification": "Logo and tagline overlap with red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200079,
+    "program_id": 300079,
+    "content_name": "Test Content 0079",
+    "content_type": "movie",
+    "sot_name": "most_popular",
+    "poster_img_url": "https://img.adrise.tv/test_0079.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 92,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200080,
+    "program_id": 300080,
+    "content_name": "Test Content 0080",
+    "content_type": "movie",
+    "sot_name": "leaving_soon",
+    "poster_img_url": "https://img.adrise.tv/test_0080.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 89,
+        "justification": "Logo and tagline overlap with red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200081,
+    "program_id": 300081,
+    "content_name": "Test Content 0081",
+    "content_type": "series",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0081.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 95,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200082,
+    "program_id": 300082,
+    "content_name": "Test Content 0082",
+    "content_type": "movie",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0082.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 85,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200083,
+    "program_id": 300083,
+    "content_name": "Test Content 0083",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0083.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 89,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200084,
+    "program_id": 300084,
+    "content_name": "Test Content 0084",
+    "content_type": "series",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0084.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 93,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200085,
+    "program_id": 300085,
+    "content_name": "Test Content 0085",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0085.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 86,
+        "justification": "All text elements are outside the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200086,
+    "program_id": 300086,
+    "content_name": "Test Content 0086",
+    "content_type": "movie",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0086.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 85,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200087,
+    "program_id": 300087,
+    "content_name": "Test Content 0087",
+    "content_type": "series",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0087.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 90,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200088,
+    "program_id": 300088,
+    "content_name": "Test Content 0088",
+    "content_type": "movie",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0088.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 90,
+        "justification": "Title text clearly visible in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200089,
+    "program_id": 300089,
+    "content_name": "Test Content 0089",
+    "content_type": "movie",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0089.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 94,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200090,
+    "program_id": 300090,
+    "content_name": "Test Content 0090",
+    "content_type": "series",
+    "sot_name": "most_popular",
+    "poster_img_url": "https://img.adrise.tv/test_0090.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 92,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200091,
+    "program_id": 300091,
+    "content_name": "Test Content 0091",
+    "content_type": "movie",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0091.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 94,
+        "justification": "Logo and tagline overlap with red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200092,
+    "program_id": 300092,
+    "content_name": "Test Content 0092",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0092.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 92,
+        "justification": "Logo and tagline overlap with red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200093,
+    "program_id": 300093,
+    "content_name": "Test Content 0093",
+    "content_type": "series",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0093.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 89,
+        "justification": "Logo and tagline overlap with red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200094,
+    "program_id": 300094,
+    "content_name": "Test Content 0094",
+    "content_type": "movie",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0094.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 89,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200095,
+    "program_id": 300095,
+    "content_name": "Test Content 0095",
+    "content_type": "movie",
+    "sot_name": "most_popular",
+    "poster_img_url": "https://img.adrise.tv/test_0095.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 89,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  },
+  {
+    "content_id": 200096,
+    "program_id": 300096,
+    "content_name": "Test Content 0096",
+    "content_type": "series",
+    "sot_name": "imdb",
+    "poster_img_url": "https://img.adrise.tv/test_0096.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 86,
+        "justification": "Logo and tagline overlap with red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200097,
+    "program_id": 300097,
+    "content_name": "Test Content 0097",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://img.adrise.tv/test_0097.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 87,
+        "justification": "Title text clearly visible in the red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200098,
+    "program_id": 300098,
+    "content_name": "Test Content 0098",
+    "content_type": "movie",
+    "sot_name": "rotten_tomatoes",
+    "poster_img_url": "https://img.adrise.tv/test_0098.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 88,
+        "justification": "Actor's face partially visible in red zone"
+      }
+    }
+  },
+  {
+    "content_id": 200099,
+    "program_id": 300099,
+    "content_name": "Test Content 0099",
+    "content_type": "series",
+    "sot_name": "most_popular",
+    "poster_img_url": "https://img.adrise.tv/test_0099.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 97,
+        "justification": "Credits text extends into red zone area"
+      }
+    }
+  }
+]

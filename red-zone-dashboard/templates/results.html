@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Results - Red Zone Analysis{% endblock %}
+
+{% block content %}
+<div class="px-4 py-5 sm:px-6">
+    <!-- Header -->
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">
+            Analysis Results
+        </h2>
+        <p class="mt-1 text-sm text-gray-600">
+            Run #{{ run.id }} - {{ run.created_at|format_datetime }}
+            {% if run.description %}
+            <span class="ml-2 italic">{{ run.description }}</span>
+            {% endif %}
+        </p>
+    </div>
+    
+    <!-- Stats Bar -->
+    <div class="bg-white shadow rounded-lg p-4 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-gray-900">{{ run.total_analyzed }}</div>
+                <div class="text-sm text-gray-500">Total</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-green-600">{{ run.pass_count }}</div>
+                <div class="text-sm text-gray-500">Pass</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-red-600">{{ run.fail_count }}</div>
+                <div class="text-sm text-gray-500">Fail</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="bg-white shadow rounded-lg p-4 mb-6">
+        <form id="filterForm" class="flex flex-wrap gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Status</label>
+                <select name="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                    <option value="">All</option>
+                    <option value="pass" {% if filters.has_elements == 0 %}selected{% endif %}>Pass Only</option>
+                    <option value="fail" {% if filters.has_elements == 1 %}selected{% endif %}>Fail Only</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Source of Truth</label>
+                <select name="sot" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                    <option value="">All SOT</option>
+                    {% for sot in sot_names %}
+                    <option value="{{ sot }}" {% if filters.sot_name == sot %}selected{% endif %}>{{ sot|upper }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700">Search</label>
+                <input type="text" name="search" value="{{ filters.search or '' }}" 
+                       placeholder="Search titles..."
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            
+            <div class="flex items-end">
+                <button type="submit" 
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="fas fa-filter mr-2"></i>
+                    Apply Filters
+                </button>
+                <a href="{{ url_for('results', run_id=run.id) }}" 
+                   class="ml-2 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                    Clear
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Results Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {% for result in results %}
+        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer" 
+             onclick="window.location.href='{{ url_for('detail', result_id=result.id) }}'"
+             data-result-id="{{ result.id }}"
+             data-content-id="{{ result.content_id }}"
+             data-program-id="{{ result.program_id }}"
+             data-title="{{ result.title }}"
+             data-sot="{{ result.sot_name }}"
+             data-confidence="{{ result.confidence }}"
+             data-has-elements="{{ result.has_elements }}"
+             data-poster-url="{{ result.poster_url }}"
+             role="button"
+             tabindex="0"
+             aria-label="View details for {{ result.title }}">
+            <!-- Poster Image with Red Zone -->
+            <div class="poster-container rounded-t-lg bg-gray-100">
+                {% if result.poster_url %}
+                <img src="{{ url_for('proxy_image', url=result.poster_url) }}" 
+                     alt="{{ result.title }}"
+                     class="poster-image"
+                     loading="lazy"
+                     data-original-url="{{ result.poster_url }}"
+                     onerror="handleImageError(this)">
+                <div class="red-zone-overlay"></div>
+                {% else %}
+                <div class="flex items-center justify-center h-full text-gray-400">
+                    <i class="fas fa-image text-4xl"></i>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Result Info -->
+            <div class="p-4">
+                <!-- Status Badge -->
+                <div class="flex items-center justify-between mb-2">
+                    {% if result.has_elements %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        <i class="fas fa-times-circle mr-1"></i> FAIL
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <i class="fas fa-check-circle mr-1"></i> PASS
+                    </span>
+                    {% endif %}
+                    
+                    <span class="text-sm font-medium text-gray-900">{{ result.confidence }}%</span>
+                </div>
+                
+                <!-- Title -->
+                <h3 class="text-sm font-medium text-gray-900 mb-2" title="{{ result.title }}">
+                    {{ result.title or 'Untitled' }}
+                </h3>
+                
+                <!-- Metadata Grid -->
+                <div class="text-xs text-gray-600 space-y-1">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500">
+                            <i class="fas fa-film mr-1"></i>Type:
+                        </span>
+                        <span class="font-medium">{{ result.content_type|capitalize }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500">
+                            <i class="fas fa-tag mr-1"></i>SOT:
+                        </span>
+                        <span class="font-medium">{{ result.sot_name|upper }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500">
+                            <i class="fas fa-hashtag mr-1"></i>Content:
+                        </span>
+                        <span class="font-mono text-xs">{{ result.content_id }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500">
+                            <i class="fas fa-tv mr-1"></i>Program:
+                        </span>
+                        <span class="font-mono text-xs">{{ result.program_id or 'N/A' }}</span>
+                    </div>
+                </div>
+                
+                <!-- Justification Preview -->
+                {% if result.justification %}
+                <div class="mt-2 pt-2 border-t border-gray-100">
+                    <p class="text-xs text-gray-600 line-clamp-2" title="{{ result.justification }}">
+                        {{ result.justification }}
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if not results %}
+    <div class="text-center py-12">
+        <i class="fas fa-search text-5xl text-gray-300 mb-4"></i>
+        <p class="text-gray-500">No results found with the current filters.</p>
+    </div>
+    {% endif %}
+    
+    <!-- Actions -->
+    <div class="mt-8 flex justify-center space-x-4">
+        <a href="{{ url_for('export_run', run_id=run.id) }}" 
+           class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+            <i class="fas fa-download mr-2"></i>
+            Export Results
+        </a>
+        <button onclick="shareResults()" 
+                class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+            <i class="fas fa-share mr-2"></i>
+            Share
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Handle filter form submission
+    document.getElementById('filterForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const params = new URLSearchParams();
+        
+        formData.forEach((value, key) => {
+            if (value) {
+                params.append(key, value);
+            }
+        });
+        
+        const queryString = params.toString();
+        window.location.href = `{{ url_for('results', run_id=run.id) }}${queryString ? '?' + queryString : ''}`;
+    });
+    
+    // Share results function
+    function shareResults() {
+        const url = window.location.href;
+        copyToClipboard(url);
+        showToast('Link copied to clipboard!');
+    }
+    
+    // Lazy loading fallback for older browsers
+    if ('loading' in HTMLImageElement.prototype) {
+        // Browser supports lazy loading
+    } else {
+        // Fallback for browsers that don't support lazy loading
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('img[loading="lazy"]');
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        img.removeAttribute('loading');
+                        imageObserver.unobserve(img);
+                    }
+                });
+            });
+            
+            images.forEach(img => imageObserver.observe(img));
+        });
+    }
+</script>
+{% endblock %}

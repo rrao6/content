@@ -1,0 +1,210 @@
+{
+  "test_date": "2025-11-14T12:59:50.364584",
+  "summary": {
+    "passed": 11,
+    "failed": 0,
+    "skipped": 1
+  },
+  "results": [
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "=== Starting Dashboard Test Suite ==="
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "Testing database initialization..."
+    },
+    {
+      "time": "12:59:50",
+      "status": "PASS",
+      "message": "\u2713 Database created successfully"
+    },
+    {
+      "time": "12:59:50",
+      "status": "PASS",
+      "message": "\u2713 All required tables created"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "Testing sample data import..."
+    },
+    {
+      "time": "12:59:50",
+      "status": "PASS",
+      "message": "\u2713 Imported test data with run ID: 3"
+    },
+    {
+      "time": "12:59:50",
+      "status": "PASS",
+      "message": "\u2713 Run metadata correct"
+    },
+    {
+      "time": "12:59:50",
+      "status": "PASS",
+      "message": "\u2713 All results imported"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "Testing statistics..."
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "Total posters: 106"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "Pass rate: 16.0%"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "Average confidence: 92.0"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "SOT breakdown:"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "  imdb: 20 total, 90.0% fail rate"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "  just_added: 24 total, 79.2% fail rate"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "  leaving_soon: 22 total, 77.3% fail rate"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "  most_popular: 25 total, 84.0% fail rate"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "  rotten_tomatoes: 15 total, 93.3% fail rate"
+    },
+    {
+      "time": "12:59:50",
+      "status": "PASS",
+      "message": "\u2713 Statistics generated successfully"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "Testing result filtering..."
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "Filter 'Pass only': 1 results"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "Filter 'Fail only': 2 results"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "Filter 'Just Added SOT': 2 results"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "Filter 'Search for 'Test'': 3 results"
+    },
+    {
+      "time": "12:59:50",
+      "status": "PASS",
+      "message": "\u2713 Filtering works correctly"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "Testing export..."
+    },
+    {
+      "time": "12:59:50",
+      "status": "PASS",
+      "message": "\u2713 Export contains 3 results"
+    },
+    {
+      "time": "12:59:50",
+      "status": "PASS",
+      "message": "\u2713 Export saved to test_export.json"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "Testing analysis batch limits..."
+    },
+    {
+      "time": "12:59:50",
+      "status": "SKIP",
+      "message": "\u2717 Analysis pipeline not available"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "Generating test data with 100 posters..."
+    },
+    {
+      "time": "12:59:50",
+      "status": "PASS",
+      "message": "\u2713 Generated test data saved to qa_test_data_100.json"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "  - Total posters: 100"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "  - Expected fail rate: ~80%"
+    },
+    {
+      "time": "12:59:50",
+      "status": "PASS",
+      "message": "\u2713 Test data imported with run ID: 4"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "  - Actual fail rate: 81.0%"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "  - Average confidence: 92.6"
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "=== Test Summary ==="
+    },
+    {
+      "time": "12:59:50",
+      "status": "INFO",
+      "message": "Passed: 11, Failed: 0, Skipped: 1"
+    },
+    {
+      "time": "12:59:50",
+      "status": "SUCCESS",
+      "message": "\u2713 All tests passed! Dashboard is ready for QA."
+    }
+  ]
+}

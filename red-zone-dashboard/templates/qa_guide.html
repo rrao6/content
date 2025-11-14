@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}QA Guide - Red Zone Analysis{% endblock %}
+
+{% block content %}
+<div class="px-4 py-5 sm:px-6 max-w-4xl mx-auto">
+    <h2 class="text-2xl font-bold text-gray-900 mb-8">
+        <i class="fas fa-clipboard-check mr-2"></i>
+        Quality Assurance Guide
+    </h2>
+    
+    <!-- QA Process Overview -->
+    <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            Recommended QA Process
+        </h3>
+        
+        <ol class="space-y-4 text-sm text-gray-600">
+            <li class="flex">
+                <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold mr-3">1</span>
+                <div>
+                    <h4 class="font-medium text-gray-900">Start Small (10-25 posters)</h4>
+                    <p>Begin with a small batch to verify the system is working correctly and to establish baseline metrics.</p>
+                </div>
+            </li>
+            
+            <li class="flex">
+                <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold mr-3">2</span>
+                <div>
+                    <h4 class="font-medium text-gray-900">Review & Optimize (25-50 posters)</h4>
+                    <p>Analyze results for accuracy. Look for patterns in false positives/negatives. Adjust confidence thresholds if needed.</p>
+                </div>
+            </li>
+            
+            <li class="flex">
+                <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold mr-3">3</span>
+                <div>
+                    <h4 class="font-medium text-gray-900">Expand Testing (50-100 posters)</h4>
+                    <p>Run larger batches to validate consistency. Test different SOT types to ensure broad coverage.</p>
+                </div>
+            </li>
+            
+            <li class="flex">
+                <span class="flex-shrink-0 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold mr-3">4</span>
+                <div>
+                    <h4 class="font-medium text-gray-900">Production Ready</h4>
+                    <p>After validating on 200-300 total posters with consistent results, proceed with larger production runs.</p>
+                </div>
+            </li>
+        </ol>
+    </div>
+    
+    <!-- Batch Size Guidelines -->
+    <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            Batch Size Guidelines
+        </h3>
+        
+        <div class="space-y-3">
+            <div class="border-l-4 border-green-400 bg-green-50 p-4">
+                <div class="flex">
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-green-800">Initial Testing: 10-25 posters</p>
+                        <p class="text-sm text-green-700">Perfect for quick verification and initial accuracy checks</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-l-4 border-blue-400 bg-blue-50 p-4">
+                <div class="flex">
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-blue-800">Standard QA: 25-50 posters</p>
+                        <p class="text-sm text-blue-700">Optimal for detailed review and pattern identification</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-l-4 border-yellow-400 bg-yellow-50 p-4">
+                <div class="flex">
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-yellow-800">Extended Testing: 50-100 posters</p>
+                        <p class="text-sm text-yellow-700">For comprehensive validation before production deployment</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-l-4 border-red-400 bg-red-50 p-4">
+                <div class="flex">
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-red-800">Maximum: 100 posters</p>
+                        <p class="text-sm text-red-700">Hard limit enforced to ensure quality control</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- QA Checklist -->
+    <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-tasks mr-2"></i>
+            QA Checklist
+        </h3>
+        
+        <div class="space-y-2">
+            <label class="flex items-start">
+                <input type="checkbox" class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                <span class="ml-2 text-sm text-gray-700">Verify red zone positioning (60% width, 10% height, top-left)</span>
+            </label>
+            
+            <label class="flex items-start">
+                <input type="checkbox" class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                <span class="ml-2 text-sm text-gray-700">Check confidence scores are within expected range (85-99%)</span>
+            </label>
+            
+            <label class="flex items-start">
+                <input type="checkbox" class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                <span class="ml-2 text-sm text-gray-700">Review justifications for clarity and accuracy</span>
+            </label>
+            
+            <label class="flex items-start">
+                <input type="checkbox" class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                <span class="ml-2 text-sm text-gray-700">Validate fail rate is consistent across SOT types</span>
+            </label>
+            
+            <label class="flex items-start">
+                <input type="checkbox" class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                <span class="ml-2 text-sm text-gray-700">Spot-check 10% of results for false positives/negatives</span>
+            </label>
+            
+            <label class="flex items-start">
+                <input type="checkbox" class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                <span class="ml-2 text-sm text-gray-700">Test export functionality with sample batch</span>
+            </label>
+        </div>
+    </div>
+    
+    <!-- Common Issues -->
+    <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            Common Issues & Solutions
+        </h3>
+        
+        <dl class="space-y-4">
+            <div>
+                <dt class="text-sm font-medium text-gray-900">High false positive rate</dt>
+                <dd class="mt-1 text-sm text-gray-600">
+                    Review posters manually to ensure red zone definition is correct. Consider adjusting confidence thresholds.
+                </dd>
+            </div>
+            
+            <div>
+                <dt class="text-sm font-medium text-gray-900">Inconsistent results between runs</dt>
+                <dd class="mt-1 text-sm text-gray-600">
+                    Enable caching and ensure consistent model parameters. Check for API rate limiting issues.
+                </dd>
+            </div>
+            
+            <div>
+                <dt class="text-sm font-medium text-gray-900">Slow analysis performance</dt>
+                <dd class="mt-1 text-sm text-gray-600">
+                    Start with smaller batches. Monitor API response times. Consider implementing parallel processing.
+                </dd>
+            </div>
+        </dl>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="bg-gray-50 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            Quick Start
+        </h3>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <a href="{{ url_for('analyze') }}?limit=10" 
+               class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                <i class="fas fa-play mr-2"></i>
+                Test 10 Posters
+            </a>
+            
+            <a href="{{ url_for('analyze') }}?limit=25" 
+               class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <i class="fas fa-play mr-2"></i>
+                QA 25 Posters
+            </a>
+            
+            <a href="{{ url_for('import_results') }}" 
+               class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                <i class="fas fa-upload mr-2"></i>
+                Import Test Data
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Handle checkbox persistence
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    
+    // Load saved state
+    checkboxes.forEach((checkbox, index) => {
+        const key = `qa_checklist_${index}`;
+        if (localStorage.getItem(key) === 'true') {
+            checkbox.checked = true;
+        }
+        
+        // Save state on change
+        checkbox.addEventListener('change', function() {
+            localStorage.setItem(key, this.checked);
+        });
+    });
+    
+    // Parse URL params for quick start links
+    const urlParams = new URLSearchParams(window.location.search);
+    const limit = urlParams.get('limit');
+    if (limit) {
+        // Redirect to analyze page with pre-filled limit
+        window.location.href = `{{ url_for('analyze') }}?preset_limit=${limit}`;
+    }
+</script>
+{% endblock %}

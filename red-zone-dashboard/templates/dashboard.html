@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Red Zone Analysis{% endblock %}
+
+{% block content %}
+<div class="px-4 py-5 sm:px-6">
+    <h2 class="text-2xl font-bold text-gray-900 mb-8">
+        <i class="fas fa-chart-line mr-2"></i>
+        Overview Dashboard
+    </h2>
+    
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+        <!-- Total Analyzed -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-images text-3xl text-gray-400"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Analyzed</dt>
+                            <dd class="text-lg font-semibold text-gray-900">{{ stats.total|default(0) }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pass Count -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-check-circle text-3xl text-green-400"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Pass</dt>
+                            <dd class="text-lg font-semibold text-gray-900">{{ stats.passed|default(0) }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Fail Count -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-times-circle text-3xl text-red-400"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Fail</dt>
+                            <dd class="text-lg font-semibold text-gray-900">{{ stats.failed|default(0) }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Average Confidence -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-chart-pie text-3xl text-blue-400"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Avg Confidence</dt>
+                            <dd class="text-lg font-semibold text-gray-900">{{ stats.avg_confidence|default(0) }}%</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Trending Chart -->
+    <div class="bg-white shadow rounded-lg p-6 mb-8">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">
+            <i class="fas fa-chart-area mr-2"></i>
+            Trend Analysis (Last 30 Days)
+        </h3>
+        <div class="relative" style="height: 300px;">
+            <canvas id="trendingChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- SOT Breakdown -->
+    <div class="bg-white shadow rounded-lg p-6 mb-8">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">
+            <i class="fas fa-tags mr-2"></i>
+            By Source of Truth
+        </h3>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {% for sot_name, sot_stats in stats.by_sot.items() %}
+            <div class="border border-gray-200 rounded-lg p-4">
+                <h4 class="font-medium text-gray-900">{{ sot_name|upper }}</h4>
+                <div class="mt-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">Total</span>
+                        <span class="font-medium">{{ sot_stats.total }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-500">Fail Rate</span>
+                        <span class="font-medium text-red-600">{{ sot_stats.fail_rate|format_percentage }}</span>
+                    </div>
+                    <div class="mt-2">
+                        <div class="relative pt-1">
+                            <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
+                                <div style="width: {{ sot_stats.fail_rate }}%" 
+                                     class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-red-500"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Recent Runs -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">
+            <i class="fas fa-history mr-2"></i>
+            Recent Analysis Runs
+        </h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pass</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fail</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for run in recent_runs %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ run.created_at|format_datetime }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900">
+                            {{ run.description or 'Analysis Run #' + run.id|string }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {{ run.total_analyzed }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">
+                            {{ run.pass_count }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600">
+                            {{ run.fail_count }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <a href="{{ url_for('results', run_id=run.id) }}" class="text-blue-600 hover:text-blue-900 mr-3">View</a>
+                            <a href="{{ url_for('export_run', run_id=run.id) }}" class="text-gray-600 hover:text-gray-900">Export</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="mt-8 flex justify-center space-x-4">
+        <a href="{{ url_for('analyze') }}" 
+           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <i class="fas fa-play mr-2"></i>
+            New Analysis
+        </a>
+        {% if latest_run %}
+        <a href="{{ url_for('results', run_id=latest_run.id) }}" 
+           class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <i class="fas fa-eye mr-2"></i>
+            View Latest Results
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Parse trending data
+    const trendingData = {{ trending_data|safe }};
+    
+    // Create trending chart
+    const ctx = document.getElementById('trendingChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: trendingData.map(d => formatDate(d.date)),
+            datasets: [
+                {
+                    label: 'Pass',
+                    data: trendingData.map(d => d.passed),
+                    borderColor: 'rgb(34, 197, 94)',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    tension: 0.1
+                },
+                {
+                    label: 'Fail',
+                    data: trendingData.map(d => d.failed),
+                    borderColor: 'rgb(239, 68, 68)',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

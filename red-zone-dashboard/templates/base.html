@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Red Zone Analysis Dashboard{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js for trending graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}">
+    
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <h1 class="text-xl font-bold text-gray-900">
+                            <i class="fas fa-film text-red-600 mr-2"></i>
+                            Red Zone Analysis
+                        </h1>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="{{ url_for('dashboard') }}" 
+                           class="{% if request.endpoint == 'dashboard' %}border-red-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Dashboard
+                        </a>
+                        <a href="{{ url_for('results') }}" 
+                           class="{% if request.endpoint == 'results' %}border-red-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Results
+                        </a>
+                        <a href="{{ url_for('analyze') }}" 
+                           class="{% if request.endpoint == 'analyze' %}border-red-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            New Analysis
+                        </a>
+                        <a href="{{ url_for('import_results') }}" 
+                           class="{% if request.endpoint == 'import_results' %}border-red-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Import
+                        </a>
+                        <a href="{{ url_for('qa_guide') }}" 
+                           class="{% if request.endpoint == 'qa_guide' %}border-red-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            QA Guide
+                        </a>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="text-sm text-gray-500">
+                        <i class="fas fa-clock mr-1"></i>
+                        <span id="current-time">Loading...</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-white mt-12">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm text-gray-500">
+                Red Zone Analysis Dashboard &copy; 2025 Tubi
+            </p>
+        </div>
+    </footer>
+    
+    <!-- Global JavaScript -->
+    <script>
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+            document.getElementById('current-time').textContent = timeStr;
+        }
+        
+        // Update time immediately and then every minute
+        updateTime();
+        setInterval(updateTime, 60000);
+        
+        // Format dates consistently
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+        
+        // Format percentages
+        function formatPercentage(value) {
+            return value.toFixed(1) + '%';
+        }
+        
+        // Copy to clipboard functionality
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Show toast notification
+                showToast('Copied to clipboard!');
+            });
+        }
+        
+        // Toast notifications
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg text-white ${
+                type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            } shadow-lg transform transition-transform duration-300 translate-y-full`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-full');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-full');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        // Progressive image loading with multiple fallback strategies
+        function handleImageError(img) {
+            const originalUrl = img.dataset.originalUrl;
+            const currentSrc = img.src;
+            
+            // Strategy 1: If proxy failed, try direct URL
+            if (currentSrc.includes('/proxy/image') && originalUrl) {
+                console.log('Proxy failed, trying direct URL:', originalUrl);
+                img.src = originalUrl;
+                img.onerror = function() {
+                    // Strategy 2: Try with HTTPS if it was HTTP
+                    if (originalUrl.startsWith('http://')) {
+                        const httpsUrl = originalUrl.replace('http://', 'https://');
+                        console.log('HTTP failed, trying HTTPS:', httpsUrl);
+                        img.src = httpsUrl;
+                        img.onerror = function() {
+                            loadPlaceholder(img);
+                        };
+                    } else {
+                        loadPlaceholder(img);
+                    }
+                };
+            } else {
+                loadPlaceholder(img);
+            }
+        }
+        
+        function loadPlaceholder(img) {
+            // Final fallback: Use our proxy placeholder
+            console.log('All strategies failed, loading placeholder');
+            img.src = '/proxy/image';  // This will return our SVG placeholder
+            img.onerror = null;  // Prevent infinite loop
+        }
+        
+        // Add loading states to images
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('.poster-image');
+            images.forEach(img => {
+                // Add loading class
+                img.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                
+                // Remove loading class when loaded
+                img.addEventListener('load', function() {
+                    img.classList.remove('opacity-0');
+                    img.classList.add('opacity-100');
+                });
+                
+                // Also handle cached images
+                if (img.complete && img.naturalHeight !== 0) {
+                    img.classList.remove('opacity-0');
+                    img.classList.add('opacity-100');
+                }
+            });
+        });
+    </script>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

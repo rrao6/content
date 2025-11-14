@@ -37,6 +37,19 @@ class DatabricksConfig(BaseSettings):
     # AI providers
     openai_api_key: Optional[str] = Field(default=None, alias="OPENAI_API_KEY")
     openai_model: str = Field(default="gpt-4o-mini", alias="OPENAI_MODEL")
+    
+    # Rate limiting settings
+    vision_requests_per_minute: int = Field(default=30, alias="VISION_REQUESTS_PER_MINUTE")
+    vision_request_delay_ms: int = Field(default=100, alias="VISION_REQUEST_DELAY_MS")
+    
+    # Analysis settings
+    enable_analysis_cache: bool = Field(default=True, alias="ENABLE_ANALYSIS_CACHE")
+    cache_expiry_hours: int = Field(default=24, alias="CACHE_EXPIRY_HOURS")
+    
+    # SOT (Sources of Truth) settings
+    sot_rolling_window_days: int = Field(default=7, alias="SOT_ROLLING_WINDOW_DAYS")
+    sot_cache_ttl_hours: int = Field(default=1, alias="SOT_CACHE_TTL_HOURS")
+    sot_batch_size: int = Field(default=500, alias="SOT_BATCH_SIZE")
 
     @property
     def fully_qualified_table(self) -> str:

@@ -35,3 +35,12 @@ Thumbs.db
 *.log
 logs/
 
+# Analysis outputs
+*.jsonl
+analysis_results.json
+posters_output.json
+sot_analysis_checkpoint.json
+eligible_titles.json
+red_zone_analysis_results.json
+sot_test_results.json
+

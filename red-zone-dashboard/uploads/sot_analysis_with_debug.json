@@ -1,0 +1,362 @@
+[
+  {
+    "content_id": 439508,
+    "program_id": 439508,
+    "content_name": "360",
+    "content_type": "MOVIE",
+    "sot_name": "just_added",
+    "poster_img_url": "http://img.adrise.tv/c1214265-f822-4503-baef-a8ee95ff213e.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 95,
+        "justification": "The red safe zone contains a human face with visible eyes, nose, and mouth, which are key elements according to the defined criteria."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_439508.png"
+      }
+    }
+  },
+  {
+    "content_id": 590873,
+    "program_id": 590873,
+    "content_name": "Marrowbone",
+    "content_type": "MOVIE",
+    "sot_name": "just_added",
+    "poster_img_url": "http://img.adrise.tv/d4ed90f0-095d-4745-9e1c-0c7eb75b97d1.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 95,
+        "justification": "The red safe zone contains a portion of a human face with visible eyes, nose, and mouth, which are key elements as per the definition."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_590873.png"
+      }
+    }
+  },
+  {
+    "content_id": 683771,
+    "program_id": 683771,
+    "content_name": "47 Meters Down",
+    "content_type": "MOVIE",
+    "sot_name": "just_added",
+    "poster_img_url": "http://img.adrise.tv/ecefb648-a18e-4ee1-8cf4-ad59e2ea6242.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 100,
+        "justification": "The red safe zone contains the text '47', which is part of the movie title, clearly visible and readable."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_683771.png"
+      }
+    }
+  },
+  {
+    "content_id": 100004365,
+    "program_id": 100004365,
+    "content_name": "The Snow Queen: Mirrorlands",
+    "content_type": "MOVIE",
+    "sot_name": "just_added",
+    "poster_img_url": "http://img.adrise.tv/f45e6f7f-38e7-475f-b986-7ef2c09702ae.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 100,
+        "justification": "The red safe zone contains the text 'THE' which is part of the movie title, clearly visible and readable."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_100004365.png"
+      }
+    }
+  },
+  {
+    "content_id": 100005776,
+    "program_id": 100005776,
+    "content_name": "Sheep & Wolves: Pig Deal",
+    "content_type": "MOVIE",
+    "sot_name": "just_added",
+    "poster_img_url": "http://img.adrise.tv/a61973dd-2c81-4bef-976c-4d1d98a493af.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 95,
+        "justification": "The red safe zone contains part of the movie title 'SHEEP & WOLVES', which is a key textual element. The text is clearly visible and identifiable."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_100005776.png"
+      }
+    }
+  },
+  {
+    "content_id": 100011545,
+    "program_id": 100011545,
+    "content_name": "Night School",
+    "content_type": "MOVIE",
+    "sot_name": "just_added",
+    "poster_img_url": "http://img.adrise.tv/2fd1954f-ca3e-4fbe-881e-9e121f529320.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 95,
+        "justification": "The red safe zone contains a human face with visible eyes, nose, and mouth, which are key elements according to the defined criteria."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_100011545.png"
+      }
+    }
+  },
+  {
+    "content_id": 100032108,
+    "program_id": 100032108,
+    "content_name": "Bad Boys",
+    "content_type": "MOVIE",
+    "sot_name": "just_added",
+    "poster_img_url": "http://img.adrise.tv/9c53bcc1-64d7-4912-bf79-a4d9191fb763.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 95,
+        "justification": "The red safe zone contains a portion of the sky and no text or human facial features are visible within this area."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_100032108.png"
+      }
+    }
+  },
+  {
+    "content_id": 100032109,
+    "program_id": 100032109,
+    "content_name": "Bad Boys II",
+    "content_type": "MOVIE",
+    "sot_name": "just_added",
+    "poster_img_url": "http://img.adrise.tv/17cc64f6-959b-455b-a26f-86f1ac4f35e6.png",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 95,
+        "justification": "The red safe zone contains a portion of the background with no text or human facial features visible."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_100032109.png"
+      }
+    }
+  },
+  {
+    "content_id": 100042864,
+    "program_id": 100042864,
+    "content_name": "Fan of Mine",
+    "content_type": "MOVIE",
+    "sot_name": "just_added",
+    "poster_img_url": "http://img.adrise.tv/c098b15f-83e6-4693-a3ed-52cecc4439c0.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 95,
+        "justification": "The red safe zone contains clear human facial features, including eyes and a nose, which are key elements as per the defined criteria."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_100042864.png"
+      }
+    }
+  },
+  {
+    "content_id": 500005036,
+    "program_id": 500005036,
+    "content_name": "Fox Super Bowl LIX Pregame",
+    "content_type": "SPORTS_EVENT",
+    "sot_name": "just_added",
+    "poster_img_url": "http://img.adrise.tv/8423beea-d4de-4902-92b7-98b3336ff6e9.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 95,
+        "justification": "The red safe zone contains only decorative elements and background textures, with no text or human facial features present."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_500005036.png"
+      }
+    }
+  },
+  {
+    "content_id": 299352,
+    "program_id": 299352,
+    "content_name": "Crank: Veneno en la sangre (Doblado)",
+    "content_type": "MOVIE",
+    "sot_name": "most_liked",
+    "poster_img_url": "http://img.adrise.tv/93576495-842f-4862-b8d5-b22929ca46fd.png",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 95,
+        "justification": "The red safe zone contains parts of a building and background texture, but no text or human facial features are visible."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_299352.png"
+      }
+    }
+  },
+  {
+    "content_id": 310136,
+    "program_id": 310136,
+    "content_name": "Hotel Rwanda",
+    "content_type": "MOVIE",
+    "sot_name": "most_liked",
+    "poster_img_url": "http://img.adrise.tv/6a1d28bb-e8d9-47c0-8f8a-2f684442c4f6.png",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 95,
+        "justification": "The red safe zone contains a portion of a suit and background texture, but no text or human facial features are visible."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_310136.png"
+      }
+    }
+  },
+  {
+    "content_id": 312926,
+    "program_id": 312926,
+    "content_name": "Gladiator",
+    "content_type": "MOVIE",
+    "sot_name": "most_liked",
+    "poster_img_url": "http://img.adrise.tv/78547430-a243-4f3f-9fdf-9dc4d715e13e.png",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 100,
+        "justification": "The red safe zone contains text, specifically the name 'RUSSELL CROWE', which is a key element as it is part of the movie credits."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_312926.png"
+      }
+    }
+  },
+  {
+    "content_id": 322944,
+    "program_id": 322944,
+    "content_name": "True Grit",
+    "content_type": "MOVIE",
+    "sot_name": "most_liked",
+    "poster_img_url": "http://img.adrise.tv/74ca1bfb-09b4-4982-a48a-b8c56af63437.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 100,
+        "justification": "The red safe zone contains text with the name 'JEFF BRIDGES', which is a key element as it is part of the credits."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_322944.png"
+      }
+    }
+  },
+  {
+    "content_id": 391450,
+    "program_id": 391450,
+    "content_name": "All Hallows' Eve",
+    "content_type": "MOVIE",
+    "sot_name": "most_liked",
+    "poster_img_url": "http://img.adrise.tv/0603a0cd-e4ce-4ca0-b4c7-46bdb018d776.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 95,
+        "justification": "The red safe zone contains the movie title 'ALL HALLOWS' EVE' in large, readable text, which is a key element."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_391450.png"
+      }
+    }
+  },
+  {
+    "content_id": 399691,
+    "program_id": 399691,
+    "content_name": "Requiem for a Dream",
+    "content_type": "MOVIE",
+    "sot_name": "most_liked",
+    "poster_img_url": "http://img.adrise.tv/3f49dc08-bda1-4554-8de4-f4bd3a5dffcd.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 95,
+        "justification": "The red safe zone contains a large portion of a human eye, which includes key facial features such as the eye itself. This clear visibility supports the conclusion."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_399691.png"
+      }
+    }
+  },
+  {
+    "content_id": 437414,
+    "program_id": 437414,
+    "content_name": "Tucker & Dale vs. Evil",
+    "content_type": "MOVIE",
+    "sot_name": "most_liked",
+    "poster_img_url": "http://img.adrise.tv/d3de110c-c418-4349-a0ba-4a22f2dab862.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 90,
+        "justification": "The red safe zone contains readable text with actor names, which are key elements according to the defined criteria."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_437414.png"
+      }
+    }
+  },
+  {
+    "content_id": 457982,
+    "program_id": 457982,
+    "content_name": "Titanic",
+    "content_type": "MOVIE",
+    "sot_name": "most_liked",
+    "poster_img_url": "http://img.adrise.tv/454de25a-1075-4b84-8612-fed949a0e482.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 95,
+        "justification": "The red safe zone contains a clear profile of a human face, including visible eyes, nose, and mouth, which are key elements as per the defined criteria."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_457982.png"
+      }
+    }
+  },
+  {
+    "content_id": 462517,
+    "program_id": 462517,
+    "content_name": "The Illusionist",
+    "content_type": "MOVIE",
+    "sot_name": "most_liked",
+    "poster_img_url": "http://img.adrise.tv/08d7419d-fec9-4db7-8628-8aeabe52fdc0.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 95,
+        "justification": "The red safe zone contains trees and background elements, but no text or human facial features are visible."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_462517.png"
+      }
+    }
+  },
+  {
+    "content_id": 465235,
+    "program_id": 465235,
+    "content_name": "Rango",
+    "content_type": "MOVIE",
+    "sot_name": "most_liked",
+    "poster_img_url": "http://img.adrise.tv/97d3e566-0e0e-432c-a419-e5d00b0e84d7.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 95,
+        "justification": "The text 'JOHNNY DEPP IS' is clearly visible within the red safe zone, which qualifies as a key element according to the defined criteria."
+      },
+      "_metadata": {
+        "composite_image": "debug_composite_images/content_465235.png"
+      }
+    }
+  }
+]

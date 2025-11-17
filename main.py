@@ -137,6 +137,16 @@ def posters(batch_size: int, include_inactive: bool, allow_null: bool, limit: Op
     default=20,
     help="Timeout in seconds for image downloads.",
 )
+@click.option(
+    "--save-composite-images",
+    is_flag=True,
+    help="Save composite images with red zone overlay for debugging/verification.",
+)
+@click.option(
+    "--composite-image-dir",
+    default="./debug_composite_images",
+    help="Directory to save composite images (default: ./debug_composite_images).",
+)
 def analyze_posters(
     limit: int,
     batch_size: int,
@@ -147,6 +157,8 @@ def analyze_posters(
     json_array: bool,
     no_download: bool,
     download_timeout: int,
+    save_composite_images: bool,
+    composite_image_dir: str,
 ):
     """Run safe-zone analysis via the configured vision provider."""
     config = get_config()
@@ -167,6 +179,8 @@ def analyze_posters(
         allow_null_urls=allow_null,
         download_images=not no_download,
         download_timeout=download_timeout,
+        save_composite_images=save_composite_images,
+        composite_image_dir=composite_image_dir,
     )
 
     serializable = [result.to_dict() for result in results]
@@ -366,6 +380,8 @@ def analyze_eligible(
             resume=False,  # Don't resume for CLI
             download_images=not no_download,
             download_timeout=download_timeout,
+            save_composite_images=True,  # Save composite images for dashboard
+            composite_image_dir="./debug_composite_images",
         )
         
         # Convert to result dicts for output

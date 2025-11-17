@@ -118,6 +118,8 @@ class SOTAnalysisPipeline:
         resume: bool = True,
         download_images: bool = True,
         download_timeout: int = 20,
+        save_composite_images: bool = False,
+        composite_image_dir: str = "./debug_composite_images",
     ) -> List[SOTAnalysisResult]:
         """
         Run analysis on eligible titles.
@@ -130,6 +132,8 @@ class SOTAnalysisPipeline:
             resume: Whether to resume from checkpoint if available
             download_images: Whether to download images to base64
             download_timeout: Timeout for image downloads
+            save_composite_images: Whether to save composite images with red zone overlay for debugging
+            composite_image_dir: Directory to save composite images (default: ./debug_composite_images)
             
         Returns:
             List of analysis results
@@ -192,6 +196,8 @@ class SOTAnalysisPipeline:
                     batch,
                     download_images=download_images,
                     download_timeout=download_timeout,
+                    save_composite_images=save_composite_images,
+                    composite_image_dir=composite_image_dir,
                 )
                 
                 # Update checkpoint
@@ -233,6 +239,8 @@ class SOTAnalysisPipeline:
                 batch,
                 download_images=download_images,
                 download_timeout=download_timeout,
+                save_composite_images=save_composite_images,
+                composite_image_dir=composite_image_dir,
             )
             
             for result in batch_results:
@@ -271,6 +279,8 @@ class SOTAnalysisPipeline:
         batch: List[EligibleTitle],
         download_images: bool = True,
         download_timeout: int = 20,
+        save_composite_images: bool = False,
+        composite_image_dir: str = "./debug_composite_images",
     ) -> List[SOTAnalysisResult]:
         """Process a batch of eligible titles."""
         results = []
@@ -279,7 +289,14 @@ class SOTAnalysisPipeline:
         pipeline = PosterAnalysisPipeline(self.content_service, self.analyzer)
         
         # Import needed modules
+        import os
+        import re
+        import base64
         from analysis import _download_image_to_base64, PosterAnalysisResult
+        
+        # Create composite image directory if needed
+        if save_composite_images:
+            os.makedirs(composite_image_dir, exist_ok=True)
         
         # Map content IDs to eligible titles (content_id might be same as program_id)
         content_map = {t.content_id if t.content_id else t.program_id: t for t in batch}
@@ -296,6 +313,22 @@ class SOTAnalysisPipeline:
             try:
                 # Download and analyze the image
                 image_data = _download_image_to_base64(t.poster_img_url)
+                
+                # Save composite image if debug mode enabled
+                if save_composite_images:
+                    base64_match = re.match(r'data:image/[^;]+;base64,(.+)', image_data)
+                    if base64_match:
+                        base64_data = base64_match.group(1)
+                        image_bytes = base64.b64decode(base64_data)
+                        save_path = os.path.join(composite_image_dir, f"content_{content_id}.png")
+                        with open(save_path, 'wb') as f:
+                            f.write(image_bytes)
+                        logger.info(
+                            "composite_image_saved",
+                            path=save_path,
+                            content_id=content_id,
+                        )
+                
                 result = self.analyzer.analyze_with_fallback(image_data)
                 
                 analysis_results.append(PosterAnalysisResult(

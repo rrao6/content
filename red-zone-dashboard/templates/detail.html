@@ -20,13 +20,16 @@
             <div class="bg-white rounded-lg shadow-lg overflow-hidden">
                 <div class="poster-container bg-gray-100">
                     {% if result.poster_url %}
-                    <img src="{{ url_for('proxy_image', url=result.poster_url) }}" 
-                         alt="{{ result.title }}"
-                         class="poster-image"
-                         id="posterImage"
-                         data-original-url="{{ result.poster_url }}"
-                         onerror="handleImageError(this)">
-                    <div class="red-zone-overlay"></div>
+                    <div class="poster-wrapper">
+                        <img src="{{ url_for('proxy_image', url=result.poster_url) }}" 
+                             alt="{{ result.title }}"
+                             class="poster-image"
+                             id="posterImage"
+                             data-original-url="{{ result.poster_url }}"
+                             onerror="handleImageError(this)"
+                             onload="positionRedZone(this)">
+                        <div class="red-zone-overlay"></div>
+                    </div>
                     {% else %}
                     <div class="flex items-center justify-center h-full text-gray-400">
                         <i class="fas fa-image text-6xl"></i>
@@ -234,6 +237,48 @@
 {% block extra_scripts %}
 <script>
     let redZoneVisible = true;
+    
+    // Position red zone overlay based on actual image dimensions
+    function positionRedZone(img) {
+        // Get the overlay element (next sibling of the image)
+        const overlay = img.nextElementSibling;
+        if (!overlay || !overlay.classList.contains('red-zone-overlay')) {
+            return;
+        }
+        
+        // Get the actual rendered dimensions of the image
+        const imgWidth = img.offsetWidth;
+        const imgHeight = img.offsetHeight;
+        
+        // Calculate red zone dimensions (60% x 10%)
+        const zoneWidth = imgWidth * 0.60;
+        const zoneHeight = imgHeight * 0.10;
+        
+        // Apply dimensions to overlay
+        overlay.style.width = zoneWidth + 'px';
+        overlay.style.height = zoneHeight + 'px';
+        
+        console.log('Red zone positioned on detail view:', {
+            imageSize: [imgWidth, imgHeight],
+            zoneSize: [zoneWidth, zoneHeight]
+        });
+    }
+    
+    // Re-position red zone on window resize
+    window.addEventListener('resize', function() {
+        const img = document.getElementById('posterImage');
+        if (img && img.complete && img.naturalHeight !== 0) {
+            positionRedZone(img);
+        }
+    });
+    
+    // Position red zone for already loaded image
+    document.addEventListener('DOMContentLoaded', function() {
+        const img = document.getElementById('posterImage');
+        if (img && img.complete && img.naturalHeight !== 0) {
+            positionRedZone(img);
+        }
+    });
     
     // Toggle red zone overlay
     function toggleRedZone() {

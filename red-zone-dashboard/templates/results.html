@@ -78,6 +78,31 @@
         </form>
     </div>
     
+    <!-- Toggle Controls -->
+    <div class="mb-6 flex justify-center">
+        <div class="flex space-x-6 p-4 bg-white rounded-lg shadow-md">
+            <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" id="toggleRedZones" checked 
+                       onchange="toggleAllRedZones(this.checked)"
+                       class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                <span class="text-sm font-medium text-gray-700">
+                    <i class="fas fa-square text-red-600 mr-1"></i>
+                    Show Red Zone Overlays
+                </span>
+            </label>
+            
+            <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" id="toggleComposites" 
+                       onchange="toggleAllComposites(this.checked)"
+                       class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                <span class="text-sm font-medium text-gray-700">
+                    <i class="fas fa-image mr-1"></i>
+                    Show Composite Images (GPT View)
+                </span>
+            </label>
+        </div>
+    </div>
+    
     <!-- Results Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {% for result in results %}
@@ -95,15 +120,27 @@
              tabindex="0"
              aria-label="View details for {{ result.title }}">
             <!-- Poster Image with Red Zone -->
-            <div class="poster-container rounded-t-lg bg-gray-100">
+            <div class="poster-container rounded-t-lg bg-gray-100" data-content-id="{{ result.content_id }}">
                 {% if result.poster_url %}
-                <img src="{{ url_for('proxy_image', url=result.poster_url) }}" 
-                     alt="{{ result.title }}"
-                     class="poster-image"
-                     loading="lazy"
-                     data-original-url="{{ result.poster_url }}"
-                     onerror="handleImageError(this)">
-                <div class="red-zone-overlay"></div>
+                <div class="poster-wrapper">
+                    <!-- Original poster image -->
+                    <img src="{{ url_for('proxy_image', url=result.poster_url) }}" 
+                         alt="{{ result.title }}"
+                         class="poster-image original-image"
+                         loading="lazy"
+                         data-original-url="{{ result.poster_url }}"
+                         data-composite-path="debug_composite_images/content_{{ result.content_id }}.png"
+                         onerror="handleImageError(this)"
+                         onload="positionRedZone(this)">
+                    <!-- Composite image (hidden by default) -->
+                    <img src="/debug_composite_images/content_{{ result.content_id }}.png" 
+                         alt="{{ result.title }} - Composite (GPT View)"
+                         class="poster-image composite-image"
+                         style="visibility: hidden;"
+                         onerror="this.style.visibility='hidden'"
+                         onload="positionRedZone(this)">
+                    <div class="red-zone-overlay"></div>
+                </div>
                 {% else %}
                 <div class="flex items-center justify-center h-full text-gray-400">
                     <i class="fas fa-image text-4xl"></i>
@@ -199,6 +236,91 @@
 
 {% block extra_scripts %}
 <script>
+    // Position red zone overlay based on actual image dimensions
+    function positionRedZone(img) {
+        if (!img || !img.parentElement) return;
+        
+        // Find the overlay in the same wrapper
+        const wrapper = img.closest('.poster-wrapper');
+        if (!wrapper) return;
+        
+        const overlay = wrapper.querySelector('.red-zone-overlay');
+        if (!overlay) return;
+        
+        // Get the natural and rendered dimensions
+        const naturalWidth = img.naturalWidth;
+        const naturalHeight = img.naturalHeight;
+        const containerWidth = wrapper.offsetWidth;
+        const containerHeight = wrapper.offsetHeight;
+        
+        // Only proceed if we have valid dimensions
+        if (naturalWidth > 0 && naturalHeight > 0 && containerWidth > 0 && containerHeight > 0) {
+            // Calculate the aspect ratios
+            const imageRatio = naturalWidth / naturalHeight;
+            const containerRatio = containerWidth / containerHeight;
+            
+            let renderedWidth, renderedHeight, offsetX, offsetY;
+            
+            // Determine how object-fit: contain will display the image
+            if (imageRatio > containerRatio) {
+                // Image is wider - will be constrained by width
+                renderedWidth = containerWidth;
+                renderedHeight = containerWidth / imageRatio;
+                offsetX = 0;
+                offsetY = (containerHeight - renderedHeight) / 2;
+            } else {
+                // Image is taller - will be constrained by height
+                renderedHeight = containerHeight;
+                renderedWidth = containerHeight * imageRatio;
+                offsetX = (containerWidth - renderedWidth) / 2;
+                offsetY = 0;
+            }
+            
+            // Calculate red zone dimensions (60% x 10% of rendered image)
+            const zoneWidth = renderedWidth * 0.60;
+            const zoneHeight = renderedHeight * 0.10;
+            
+            // Position overlay to match image position
+            overlay.style.left = offsetX + 'px';
+            overlay.style.top = offsetY + 'px';
+            overlay.style.width = zoneWidth + 'px';
+            overlay.style.height = zoneHeight + 'px';
+            
+            console.log('Red zone positioned:', {
+                imageSize: [renderedWidth, renderedHeight],
+                offset: [offsetX, offsetY],
+                zoneSize: [zoneWidth, zoneHeight],
+                contentId: wrapper.closest('[data-content-id]')?.dataset.contentId
+            });
+        }
+    }
+    
+    // Position all red zones
+    function positionAllRedZones() {
+        document.querySelectorAll('.poster-image').forEach(function(img) {
+            // Skip hidden composite images
+            if (img.style.display === 'none') return;
+            
+            if (img.complete && img.naturalHeight !== 0) {
+                positionRedZone(img);
+            } else {
+                // If not loaded yet, wait a bit and try again
+                setTimeout(() => positionRedZone(img), 100);
+            }
+        });
+    }
+    
+    // Re-position all red zones on window resize
+    window.addEventListener('resize', positionAllRedZones);
+    
+    // Position red zones when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        positionAllRedZones();
+        // Also try again after a short delay to catch lazy-loaded images
+        setTimeout(positionAllRedZones, 500);
+        setTimeout(positionAllRedZones, 1000);
+    });
+    
     // Handle filter form submission
     document.getElementById('filterForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -215,6 +337,50 @@
         const queryString = params.toString();
         window.location.href = `{{ url_for('results', run_id=run.id) }}${queryString ? '?' + queryString : ''}`;
     });
+    
+    // Toggle all red zone overlays
+    function toggleAllRedZones(show) {
+        const overlays = document.querySelectorAll('.red-zone-overlay');
+        overlays.forEach(overlay => {
+            overlay.style.display = show ? 'block' : 'none';
+        });
+        console.log('Red zones ' + (show ? 'shown' : 'hidden'));
+    }
+    
+    // Toggle all composite images
+    function toggleAllComposites(show) {
+        const containers = document.querySelectorAll('.poster-wrapper');
+        const showRedZones = document.getElementById('toggleRedZones').checked;
+        
+        containers.forEach(container => {
+            const originalImg = container.querySelector('.original-image');
+            const compositeImg = container.querySelector('.composite-image');
+            const redZone = container.querySelector('.red-zone-overlay');
+            
+            if (originalImg && compositeImg) {
+                if (show) {
+                    // Show composite (which has red zone baked in)
+                    compositeImg.style.visibility = 'visible';
+                    // Always hide CSS red zone overlay when showing composite
+                    if (redZone) redZone.style.opacity = '0';
+                } else {
+                    // Hide composite
+                    compositeImg.style.visibility = 'hidden';
+                    // Restore red zone overlay visibility based on current toggle state
+                    if (redZone) {
+                        redZone.style.opacity = showRedZones ? '1' : '0';
+                    }
+                }
+            }
+        });
+        
+        // Reposition all red zones after toggle (only if not showing composite and red zones are on)
+        if (!show && showRedZones) {
+            setTimeout(positionAllRedZones, 100);
+        }
+        
+        console.log('Composite images ' + (show ? 'shown' : 'hidden'));
+    }
     
     // Share results function
     function shareResults() {

@@ -1,0 +1,152 @@
+[
+  {
+    "content_id": 500001,
+    "program_id": 600001,
+    "content_name": "The Dark Knight",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 95,
+        "justification": "The red safe zone contains part of a building and smoke, but no text or human facial features are visible."
+      }
+    }
+  },
+  {
+    "content_id": 500002,
+    "program_id": 600002,
+    "content_name": "Inception",
+    "content_type": "movie",
+    "sot_name": "most_liked",
+    "poster_img_url": "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 95,
+        "justification": "The movie title 'INCEPTION' is clearly visible within the red safe zone, which is a key textual element."
+      }
+    }
+  },
+  {
+    "content_id": 500003,
+    "program_id": 600003,
+    "content_name": "Interstellar",
+    "content_type": "movie",
+    "sot_name": "imdb",
+    "poster_img_url": "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 95,
+        "justification": "The red safe zone contains part of a snowy background with no visible text or human facial features."
+      }
+    }
+  },
+  {
+    "content_id": 500004,
+    "program_id": 600004,
+    "content_name": "The Matrix",
+    "content_type": "movie",
+    "sot_name": "award",
+    "poster_img_url": "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 95,
+        "justification": "The red safe zone in the top-left corner contains no text or human facial features. It primarily shows background elements and part of a character's clothing, which do not qualify as key elements."
+      }
+    }
+  },
+  {
+    "content_id": 500005,
+    "program_id": 600005,
+    "content_name": "Pulp Fiction",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://image.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 100,
+        "justification": "The red safe zone contains the movie title 'PULP FICTION' in large, readable text, which is a key element."
+      }
+    }
+  },
+  {
+    "content_id": 500006,
+    "program_id": 600006,
+    "content_name": "Fight Club",
+    "content_type": "movie",
+    "sot_name": "most_liked",
+    "poster_img_url": "https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 95,
+        "justification": "The red safe zone contains the text 'FIGHT CLUB' on a pink bar of soap, which is a key element as it includes the movie title."
+      }
+    }
+  },
+  {
+    "content_id": 500007,
+    "program_id": 600007,
+    "content_name": "Forrest Gump",
+    "content_type": "movie",
+    "sot_name": "award",
+    "poster_img_url": "https://image.tmdb.org/t/p/w500/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 100,
+        "justification": "The movie title 'Forrest Gump' is clearly visible within the red safe zone, which is a key textual element."
+      }
+    }
+  },
+  {
+    "content_id": 500008,
+    "program_id": 600008,
+    "content_name": "The Shawshank Redemption",
+    "content_type": "movie",
+    "sot_name": "imdb",
+    "poster_img_url": "https://image.tmdb.org/t/p/w500/9cqNxx0GxF0bflZmeSMuL5tnGzr.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 95,
+        "justification": "The red safe zone contains no text or human facial features. It primarily shows background lighting and texture, which are not considered key elements."
+      }
+    }
+  },
+  {
+    "content_id": 500009,
+    "program_id": 600009,
+    "content_name": "Goodfellas",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://image.tmdb.org/t/p/w500/aKuFiU82s5ISJpGZp7YkIr3kCUd.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 95,
+        "justification": "The red safe zone contains a human face with visible eyes, nose, and mouth, which are key elements according to the defined criteria."
+      }
+    }
+  },
+  {
+    "content_id": 500010,
+    "program_id": 600010,
+    "content_name": "The Godfather",
+    "content_type": "movie",
+    "sot_name": "award",
+    "poster_img_url": "https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 95,
+        "justification": "The red safe zone contains a portion of a human face, including eyes, nose, and mouth, which are key elements as per the defined criteria."
+      }
+    }
+  }
+]

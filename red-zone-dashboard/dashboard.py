@@ -298,6 +298,25 @@ def export_run(run_id):
     return send_file(filepath, as_attachment=True, download_name=filename)
 
 
+@app.route('/debug_composite_images/<path:filename>')
+def serve_composite_image(filename):
+    """Serve composite debug images."""
+    import os
+    composite_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'debug_composite_images')
+    
+    # Security: prevent directory traversal
+    if '..' in filename or filename.startswith('/'):
+        return "Invalid filename", 400
+    
+    filepath = os.path.join(composite_dir, filename)
+    
+    if os.path.exists(filepath):
+        return send_file(filepath, mimetype='image/png')
+    else:
+        # Return placeholder if composite doesn't exist
+        return placeholder_image()
+
+
 @app.route('/proxy/image')
 def proxy_image():
     """Proxy images to handle HTTP/HTTPS and CORS issues."""
@@ -308,7 +327,7 @@ def proxy_image():
         return placeholder_image()
     
     # Only allow specific domains
-    allowed_domains = ['img.adrise.tv', 'adrise.tv']
+    allowed_domains = ['img.adrise.tv', 'adrise.tv', 'image.tmdb.org', 'themoviedb.org']
     from urllib.parse import urlparse
     parsed = urlparse(url)
     if not any(domain in parsed.netloc for domain in allowed_domains):

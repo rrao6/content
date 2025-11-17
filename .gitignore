@@ -43,4 +43,8 @@ sot_analysis_checkpoint.json
 eligible_titles.json
 red_zone_analysis_results.json
 sot_test_results.json
+debug_composite_images/
+
+# virtual env
+poster-analysis/
 

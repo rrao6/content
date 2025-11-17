@@ -1,0 +1,77 @@
+[
+  {
+    "content_id": 500001,
+    "program_id": 600001,
+    "content_name": "The Dark Knight",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 95,
+        "justification": "The red safe zone contains part of a building and some background lighting effects, but no text or human facial features are present."
+      }
+    }
+  },
+  {
+    "content_id": 500002,
+    "program_id": 600002,
+    "content_name": "Inception",
+    "content_type": "movie",
+    "sot_name": "most_liked",
+    "poster_img_url": "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 95,
+        "justification": "The movie title 'INCEPTION' is clearly visible within the red safe zone, which is a key textual element."
+      }
+    }
+  },
+  {
+    "content_id": 500003,
+    "program_id": 600003,
+    "content_name": "Interstellar",
+    "content_type": "movie",
+    "sot_name": "imdb",
+    "poster_img_url": "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 95,
+        "justification": "The red safe zone contains part of a snowy background with no visible text or human facial features."
+      }
+    }
+  },
+  {
+    "content_id": 500004,
+    "program_id": 600004,
+    "content_name": "The Matrix",
+    "content_type": "movie",
+    "sot_name": "award",
+    "poster_img_url": "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": false,
+        "confidence": 95,
+        "justification": "The red safe zone contains no text or human facial features. It primarily shows background elements and part of a character's clothing, which do not qualify as key elements."
+      }
+    }
+  },
+  {
+    "content_id": 500005,
+    "program_id": 600005,
+    "content_name": "Pulp Fiction",
+    "content_type": "movie",
+    "sot_name": "just_added",
+    "poster_img_url": "https://image.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
+    "analysis": {
+      "red_safe_zone": {
+        "contains_key_elements": true,
+        "confidence": 100,
+        "justification": "The red safe zone contains the movie title 'PULP FICTION', which is a key textual element."
+      }
+    }
+  }
+]

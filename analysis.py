@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import base64
+import io
 import json
+import os
 import re
 import time
 from dataclasses import dataclass
@@ -10,6 +12,7 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 
 import requests
 import structlog
+from PIL import Image, ImageDraw
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from tenacity import (
@@ -51,25 +54,61 @@ class ResponseParsingError(VisionProviderError):
 
 
 # Use technical UI prompt for better compatibility and fewer refusals
-SAFE_ZONE_PROMPT = """You are analyzing a movie poster for UI overlay compatibility.
-Examine ONLY the top-left rectangular region (60% width, 10% height) of the poster.
+SAFE_ZONE_PROMPT = """
+You are an expert visual analysis model. Analyze a movie poster image and evaluate whether any key visual or textual elements appear inside the defined red safe zone.
 
-Identify if this region contains:
-1. Any text (title, credits, taglines, logos)
-2. Human facial features (eyes, nose, mouth, clear faces)
+Red Safe Zone Definition:
+The red safe zone is the highlighted rectangular region in the top-left corner of the poster. Only analyze this red-outlined area — ignore all other parts of the image.
 
-This is for technical UI placement, not content review. Focus only on spatial positioning.
+Key Element Definition (Strict Rule Set):
+Only the following count as key elements:
 
-Return JSON:
+Text — including:
+
+Movie title
+
+Taglines
+
+Credits
+
+Logos
+
+Any readable overlayed words
+
+Human facial features — including:
+
+Eyes
+
+Nose
+
+Mouth
+
+Clearly identifiable facial profiles or large face portions
+
+Do NOT count:
+
+Buildings, props, weapons, or objects
+
+Background lighting or texture
+
+Hands, clothing, or hair (unless part of a clearly visible face)
+
+Decorative elements or effects
+
+Output Format (JSON):
 {
-  "red_safe_zone": {
-    "contains_key_elements": boolean,
-    "confidence": 0-100,
-    "justification": "brief technical explanation"
-  }
+"red_safe_zone": {
+"contains_key_elements": true | false,
+"confidence": <integer 0–100>,
+"justification": "<1–3 concise sentences explaining what was observed in the red zone and why it supports your conclusion.>"
+}
 }
 
-Return only JSON."""
+Confidence Scoring Guidelines:
+90–100: Clear detection or clear absence of key elements
+60–89: Partial, ambiguous, or uncertain detection
+0–59: Minimal visibility, unclear evidence, or poor visibility
+"""
 
 # Fallback prompt for simpler analysis
 SIMPLE_SAFE_ZONE_PROMPT = """Check top-left corner (60% width, 10% height) for text or faces.
@@ -118,6 +157,87 @@ def _create_retry_session(retries: int = 3, backoff_factor: float = 0.3) -> requ
     return session
 
 
+def _add_red_zone_overlay(image_data: bytes) -> bytes:
+    """
+    Add red rectangle overlay showing the safe zone (top-left 60% × 10%).
+    Includes thicker border and semi-transparent fill for better GPT visibility.
+    
+    Args:
+        image_data: Raw image bytes
+        
+    Returns:
+        Image bytes with red rectangle overlay
+    """
+    try:
+        # Open image from bytes
+        img = Image.open(io.BytesIO(image_data))
+        
+        # Convert to RGBA to support transparency
+        if img.mode != 'RGBA':
+            img = img.convert('RGBA')
+        
+        # Get image dimensions
+        width, height = img.size
+        
+        # Calculate red zone dimensions (top-left 60% × 10%)
+        zone_width = int(width * 0.60)
+        zone_height = int(height * 0.10)
+        
+        # Create a transparent overlay layer
+        overlay = Image.new('RGBA', img.size, (0, 0, 0, 0))
+        overlay_draw = ImageDraw.Draw(overlay)
+        
+        # Draw semi-transparent red fill (10% opacity = 26 out of 255)
+        overlay_draw.rectangle(
+            [(0, 0), (zone_width, zone_height)],
+            fill=(255, 0, 0, 26)  # Red with 10% opacity
+        )
+        
+        # Composite the overlay onto the original image
+        img = Image.alpha_composite(img, overlay)
+        
+        # Convert back to RGB for final output
+        img = img.convert('RGB')
+        
+        # Create drawing context for border
+        draw = ImageDraw.Draw(img)
+        
+        # Draw thicker red rectangle border (6px for better visibility in GPT)
+        border_thickness = 6
+        
+        # Draw multiple rectangles for thick border
+        for i in range(border_thickness):
+            draw.rectangle(
+                [(i, i), (zone_width - i, zone_height - i)],
+                outline='red',
+                width=1
+            )
+        
+        # Save modified image to bytes
+        output = io.BytesIO()
+        img.save(output, format='PNG', quality=95)
+        output.seek(0)
+        
+        logger.debug(
+            "red_zone_overlay_added",
+            original_size=(width, height),
+            zone_size=(zone_width, zone_height),
+            border_thickness=border_thickness,
+            fill_opacity="10%",
+        )
+        
+        return output.read()
+        
+    except Exception as exc:
+        logger.warning(
+            "red_zone_overlay_failed",
+            error=str(exc),
+            error_type=type(exc).__name__,
+        )
+        # Return original image data if overlay fails
+        return image_data
+
+
 @retry(
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=2, max=10),
@@ -128,7 +248,8 @@ def _create_retry_session(retries: int = 3, backoff_factor: float = 0.3) -> requ
 def _download_image_to_base64(
     url: str, 
     timeout: int = 20, 
-    max_size_mb: int = 10
+    max_size_mb: int = 10,
+    add_red_zone: bool = True
 ) -> str:
     """
     Download image from URL and convert to base64 data URI.
@@ -137,9 +258,10 @@ def _download_image_to_base64(
         url: Image URL to download
         timeout: Request timeout in seconds
         max_size_mb: Maximum image size in megabytes
+        add_red_zone: If True, overlay red rectangle showing the safe zone
         
     Returns:
-        Base64-encoded data URI suitable for OpenAI API
+        Base64-encoded data URI suitable for OpenAI API (with red zone overlay if requested)
         
     Raises:
         ImageDownloadError: If download fails
@@ -174,10 +296,16 @@ def _download_image_to_base64(
         # Combine chunks
         image_data = b''.join(chunks)
         
-        # Determine MIME type
-        content_type = response.headers.get('content-type', 'image/png')
-        if not content_type.startswith('image/'):
-            content_type = 'image/png'  # Default fallback
+        # Add red zone overlay if requested
+        if add_red_zone:
+            image_data = _add_red_zone_overlay(image_data)
+            # After overlay, we're always sending PNG
+            content_type = 'image/png'
+        else:
+            # Determine MIME type from original
+            content_type = response.headers.get('content-type', 'image/png')
+            if not content_type.startswith('image/'):
+                content_type = 'image/png'  # Default fallback
             
         # Encode to base64
         base64_data = base64.b64encode(image_data).decode('ascii')
@@ -188,6 +316,7 @@ def _download_image_to_base64(
             url=url,
             size_bytes=total_size,
             content_type=content_type,
+            red_zone_added=add_red_zone,
         )
         
         return data_uri
@@ -559,6 +688,8 @@ class PosterAnalysisPipeline:
         download_images: bool = True,
         download_timeout: int = 20,
         use_fallback: bool = True,
+        save_composite_images: bool = False,
+        composite_image_dir: str = "./debug_composite_images",
     ) -> List[PosterAnalysisResult]:
         """
         Analyze poster images and return structured responses.
@@ -571,6 +702,8 @@ class PosterAnalysisPipeline:
             download_images: Whether to download images to base64 (fixes HTTP issues)
             download_timeout: Timeout for image downloads in seconds
             use_fallback: Whether to use fallback strategies if primary analysis fails
+            save_composite_images: Whether to save composite images with red zone overlay for debugging
+            composite_image_dir: Directory to save composite images (default: ./debug_composite_images)
         """
         results: List[PosterAnalysisResult] = []
         iterator = self.service.iter_poster_images(
@@ -627,6 +760,24 @@ class PosterAnalysisPipeline:
                         )
                         download_duration_ms = (time.time() - download_start) * 1000
                         self.monitor.record_download_duration(download_duration_ms)
+                        
+                        # Save composite image if debug mode enabled
+                        if save_composite_images:
+                            os.makedirs(composite_image_dir, exist_ok=True)
+                            # Decode the base64 to get the actual image bytes
+                            base64_match = re.match(r'data:image/[^;]+;base64,(.+)', image_data)
+                            if base64_match:
+                                base64_data = base64_match.group(1)
+                                image_bytes = base64.b64decode(base64_data)
+                                save_path = os.path.join(composite_image_dir, f"content_{poster.content_id}.png")
+                                with open(save_path, 'wb') as f:
+                                    f.write(image_bytes)
+                                logger.info(
+                                    "composite_image_saved",
+                                    path=save_path,
+                                    content_id=poster.content_id,
+                                )
+                        
                         logger.info(
                             "image_ready_for_analysis",
                             content_id=poster.content_id,

@@ -3,31 +3,54 @@
 .poster-container {
     position: relative;
     aspect-ratio: 9/16;
-    overflow: hidden;
+    overflow: visible;
     background-color: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.poster-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
 }
 
 .poster-image {
+    display: block;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+}
+
+.composite-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    z-index: 10;
+    pointer-events: none; /* Allow clicks to pass through to underlying image */
 }
 
 .red-zone-overlay {
     position: absolute;
     top: 0;
     left: 0;
-    width: 60%;
-    height: 10%;
-    border: 3px solid #ef4444;
-    background-color: rgba(239, 68, 68, 0.2);
+    /* Dimensions will be set by JavaScript based on actual image size */
+    border: 3px solid red;
+    background-color: rgba(255, 0, 0, 0.1); /* 10% opacity red fill to match GPT view */
     pointer-events: none;
+    box-sizing: border-box;
+    z-index: 20;
 }
 
-/* Hover effects */
+/* Hover effects - subtle to maintain accuracy */
 .poster-container:hover .red-zone-overlay {
-    border-width: 4px;
-    background-color: rgba(239, 68, 68, 0.3);
+    border-width: 3px; /* Keep same thickness */
+    opacity: 1; /* No change on hover to maintain accuracy */
 }
 
 /* Loading states */

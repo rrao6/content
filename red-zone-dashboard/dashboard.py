@@ -2,8 +2,10 @@
 import os
 import sys
 import json
+import csv
 from datetime import datetime
 from pathlib import Path
+from io import StringIO
 from flask import Flask, render_template, jsonify, request, send_file, redirect, url_for, Response
 import requests
 
@@ -330,6 +332,67 @@ def export_run_pdf(run_id):
         )
     except Exception as e:
         return f"PDF generation failed: {str(e)}", 500
+
+
+@app.route('/export/csv/<int:run_id>')
+def export_run_csv(run_id):
+    """Export results as CSV."""
+    run = AnalysisRun.get_by_id(run_id)
+    if not run:
+        return "Run not found", 404
+    
+    results = PosterResult.get_by_run(run_id)
+    
+    # Create CSV in memory
+    output = StringIO()
+    writer = csv.writer(output)
+    
+    # Write header
+    writer.writerow([
+        'content_id',
+        'program_id',
+        'title',
+        'content_type',
+        'sot_name',
+        'poster_url',
+        'sot_label',
+        'confidence',
+        'explanation',
+        'analysis_date',
+        'run_id'
+    ])
+    
+    # Write data rows
+    for result in results:
+        # Determine pass/fail label
+        has_elements = result.get('has_elements', True)
+        sot_label = 'fail' if has_elements else 'pass'
+        
+        writer.writerow([
+            result.get('content_id', ''),
+            result.get('program_id', ''),
+            result.get('title', ''),
+            result.get('content_type', ''),
+            result.get('sot_name', ''),
+            result.get('poster_url', ''),
+            sot_label,
+            result.get('confidence', ''),
+            result.get('justification', ''),
+            result.get('created_at', ''),
+            run_id
+        ])
+    
+    # Prepare response
+    output.seek(0)
+    filename = f"red_zone_analysis_run_{run_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={
+            'Content-Disposition': f'attachment; filename={filename}'
+        }
+    )
 
 
 @app.route('/debug_composite_images/<path:filename>')

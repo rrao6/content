@@ -165,6 +165,9 @@
                             <a href="{{ url_for('export_run_pdf', run_id=run.id) }}" class="text-red-600 hover:text-red-900 mr-3" title="Export PDF Report">
                                 <i class="fas fa-file-pdf"></i>
                             </a>
+                            <a href="{{ url_for('export_run_csv', run_id=run.id) }}" class="text-green-600 hover:text-green-900 mr-3" title="Export CSV">
+                                <i class="fas fa-file-csv"></i>
+                            </a>
                             <a href="{{ url_for('export_run', run_id=run.id) }}" class="text-gray-600 hover:text-gray-900" title="Export JSON">
                                 <i class="fas fa-file-code"></i>
                             </a>

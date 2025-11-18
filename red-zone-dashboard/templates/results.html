@@ -225,6 +225,11 @@
             <i class="fas fa-file-pdf mr-2"></i>
             Export PDF Report
         </a>
+        <a href="{{ url_for('export_run_csv', run_id=run.id) }}" 
+           class="inline-flex items-center px-4 py-2 border border-green-500 text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+            <i class="fas fa-file-csv mr-2"></i>
+            Export CSV
+        </a>
         <a href="{{ url_for('export_run', run_id=run.id) }}" 
            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
             <i class="fas fa-download mr-2"></i>

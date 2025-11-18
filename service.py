@@ -193,4 +193,57 @@ class EligibleTitlesService:
         """Clear the eligible titles cache."""
         self._cache.clear()
         logger.info("eligible_titles_cache_cleared")
+    
+    def get_shiny_eligible_poster_images(
+        self,
+        days_back: int = 7,
+        sot_types: Optional[List[str]] = None,
+        limit: Optional[int] = None,
+    ) -> List[EligibleTitle]:
+        """
+        Get shiny eligible titles that have poster images.
+        
+        This method filters for only shiny titles (is_cms_shiny = 1).
+        
+        Returns:
+            List of shiny eligible titles with poster URLs
+        """
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=days_back)
+        
+        titles = self.repository.get_shiny_eligible_titles_with_content(
+            start_date=start_date,
+            end_date=end_date,
+            sot_types=sot_types,
+            limit=limit,
+        )
+        
+        # Filter to only those with poster URLs
+        return [t for t in titles if t.poster_img_url]
+    
+    def iter_shiny_eligible_poster_images(
+        self,
+        days_back: int = 7,
+        sot_types: Optional[List[str]] = None,
+        batch_size: int = 500,
+        max_items: Optional[int] = None,
+    ) -> Iterable[EligibleTitle]:
+        """
+        Stream shiny eligible titles with poster images.
+        
+        This method filters for only shiny titles (is_cms_shiny = 1).
+        
+        Yields:
+            EligibleTitle objects with poster URLs for shiny titles only
+        """
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=days_back)
+        
+        return self.repository.iter_shiny_eligible_titles_with_content(
+            start_date=start_date,
+            end_date=end_date,
+            sot_types=sot_types,
+            batch_size=batch_size,
+            max_items=max_items,
+        )
 

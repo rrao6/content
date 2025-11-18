@@ -165,12 +165,21 @@ class SOTAnalysisPipeline:
             )
         
         # Get eligible titles
+        print(f"\n🎬 Starting SOT Analysis Pipeline")
+        print(f"{'='*70}")
+        print(f"📅 Days back: {days_back}")
+        print(f"🎯 SOT types: {sot_types if sot_types else 'ALL'}")
+        print(f"📊 Limit: {limit if limit else 'No limit'}")
+        print(f"💾 Save composite images: {save_composite_images}")
+        print(f"{'='*70}\n")
+        
         logger.info(
             "fetching_eligible_titles_pipeline",
             days_back=days_back,
             sot_types=sot_types,
         )
         
+        print("🔍 Fetching eligible titles from database...")
         eligible_gen = self.eligible_service.iter_eligible_poster_images(
             days_back=days_back,
             sot_types=sot_types,
@@ -198,6 +207,9 @@ class SOTAnalysisPipeline:
                     download_timeout=download_timeout,
                     save_composite_images=save_composite_images,
                     composite_image_dir=composite_image_dir,
+                    current_count=checkpoint.processed_count,
+                    total_limit=limit,
+                    start_time=start_time,
                 )
                 
                 # Update checkpoint
@@ -222,6 +234,21 @@ class SOTAnalysisPipeline:
                 rate = checkpoint.processed_count / elapsed if elapsed > 0 else 0
                 eta_seconds = (limit - checkpoint.processed_count) / rate if rate > 0 and limit else 0
                 
+                # Calculate percentage
+                pct_complete = (checkpoint.processed_count / limit * 100) if limit else 0
+                
+                # User-friendly progress message
+                print(f"\n{'='*70}")
+                print(f"Progress: {checkpoint.processed_count}/{limit} ({pct_complete:.1f}% complete)")
+                print(f"{'='*70}")
+                print(f"✅ Success: {checkpoint.success_count}")
+                print(f"❌ Errors:  {checkpoint.error_count}")
+                print(f"⚡ Rate:    {rate * 60:.1f} posters/minute")
+                if eta_seconds > 0:
+                    eta_mins = eta_seconds / 60
+                    print(f"⏱️  ETA:     {eta_mins:.1f} minutes ({eta_seconds:.0f} seconds)")
+                print(f"{'='*70}\n")
+                
                 logger.info(
                     "batch_processed",
                     processed=checkpoint.processed_count,
@@ -229,6 +256,7 @@ class SOTAnalysisPipeline:
                     errors=checkpoint.error_count,
                     rate_per_minute=rate * 60,
                     eta_minutes=eta_seconds / 60,
+                    percent_complete=pct_complete,
                 )
                 
                 batch = []
@@ -241,6 +269,9 @@ class SOTAnalysisPipeline:
                 download_timeout=download_timeout,
                 save_composite_images=save_composite_images,
                 composite_image_dir=composite_image_dir,
+                current_count=checkpoint.processed_count,
+                total_limit=limit,
+                start_time=start_time,
             )
             
             for result in batch_results:
@@ -264,12 +295,28 @@ class SOTAnalysisPipeline:
             logger.info("checkpoint_removed_on_completion")
         
         # Log final summary
+        duration_seconds = time.time() - start_time
+        duration_minutes = duration_seconds / 60
+        
+        # Print final summary
+        print(f"\n{'='*70}")
+        print(f"✨ Analysis Complete!")
+        print(f"{'='*70}")
+        print(f"📊 Total processed: {len(results)}")
+        print(f"✅ Success: {checkpoint.success_count}")
+        print(f"❌ Errors: {checkpoint.error_count}")
+        print(f"⏱️  Duration: {duration_minutes:.1f} minutes ({duration_seconds:.0f} seconds)")
+        if checkpoint.success_count > 0:
+            avg_time = duration_seconds / checkpoint.success_count
+            print(f"📈 Avg time per poster: {avg_time:.1f} seconds")
+        print(f"{'='*70}\n")
+        
         logger.info(
             "sot_analysis_complete",
             total_processed=len(results),
             success=checkpoint.success_count,
             errors=checkpoint.error_count,
-            duration_minutes=(time.time() - start_time) / 60,
+            duration_minutes=duration_minutes,
         )
         
         return results
@@ -281,6 +328,9 @@ class SOTAnalysisPipeline:
         download_timeout: int = 20,
         save_composite_images: bool = False,
         composite_image_dir: str = "./debug_composite_images",
+        current_count: int = 0,
+        total_limit: Optional[int] = None,
+        start_time: Optional[float] = None,
     ) -> List[SOTAnalysisResult]:
         """Process a batch of eligible titles."""
         results = []
@@ -297,12 +347,14 @@ class SOTAnalysisPipeline:
         # Create composite image directory if needed
         if save_composite_images:
             os.makedirs(composite_image_dir, exist_ok=True)
+            print(f"📸 Composite images will be saved to: {composite_image_dir}")
         
         # Map content IDs to eligible titles (content_id might be same as program_id)
         content_map = {t.content_id if t.content_id else t.program_id: t for t in batch}
         
         # Analyze specific posters
         analysis_results = []
+        batch_item_count = 0
         for t in batch:
             if not t.poster_img_url:
                 continue
@@ -310,7 +362,17 @@ class SOTAnalysisPipeline:
             # Use content_id if available, otherwise use program_id
             content_id = t.content_id if t.content_id else t.program_id
             
+            # Calculate current position
+            item_number = current_count + batch_item_count + 1
+            
             try:
+                # Show individual progress
+                if total_limit:
+                    pct = (item_number / total_limit * 100)
+                    print(f"🔄 Processing {item_number}/{total_limit} ({pct:.1f}%) - {t.content_name or 'Unknown'} (ID: {content_id})")
+                else:
+                    print(f"🔄 Processing item {item_number} - {t.content_name or 'Unknown'} (ID: {content_id})")
+                
                 # Download and analyze the image
                 image_data = _download_image_to_base64(t.poster_img_url)
                 
@@ -331,24 +393,45 @@ class SOTAnalysisPipeline:
                 
                 result = self.analyzer.analyze_with_fallback(image_data)
                 
+                # Determine pass/fail status
+                status = "❌ FAIL" if result.get("red_safe_zone", {}).get("contains_key_elements") else "✅ PASS"
+                confidence = result.get("red_safe_zone", {}).get("confidence", 0)
+                
+                # Show completion with status
+                if total_limit and start_time:
+                    elapsed = time.time() - start_time
+                    rate = item_number / elapsed if elapsed > 0 else 0
+                    remaining = total_limit - item_number
+                    eta_seconds = remaining / rate if rate > 0 else 0
+                    print(f"   {status} (confidence: {confidence}%) | Rate: {rate * 60:.1f}/min | ETA: {eta_seconds:.0f}s\n")
+                else:
+                    print(f"   {status} (confidence: {confidence}%)\n")
+                
                 analysis_results.append(PosterAnalysisResult(
                     content_id=content_id,
                     poster_img_url=t.poster_img_url,
                     analysis=result,
                     error=None
                 ))
+                
+                batch_item_count += 1
+                
             except Exception as e:
                 logger.error(
                     "poster_analysis_failed",
                     content_id=content_id,
                     error=str(e),
                 )
+                print(f"   ❌ ERROR: {str(e)}\n")
+                
                 analysis_results.append(PosterAnalysisResult(
                     content_id=content_id,
                     poster_img_url=t.poster_img_url,
                     analysis=None,
                     error=str(e)
                 ))
+                
+                batch_item_count += 1
         
         # Convert to SOT results
         for analysis_result in analysis_results:

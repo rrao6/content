@@ -13,6 +13,7 @@ from sot_query import (
     get_eligible_titles_query,
     get_eligible_titles_with_content_query,
     get_eligible_titles_count_query,
+    get_shiny_eligible_titles_with_content_query,
 )
 
 logger = structlog.get_logger(__name__)
@@ -283,3 +284,122 @@ class SOTRepository:
                 error_type=type(exc).__name__,
             )
             raise DatabricksQueryError(f"Failed to count eligible titles: {exc}") from exc
+    
+    def get_shiny_eligible_titles_with_content(
+        self,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
+        sot_types: Optional[List[str]] = None,
+        limit: Optional[int] = None,
+    ) -> List[EligibleTitle]:
+        """
+        Fetch shiny eligible titles with content info including poster URLs.
+        
+        This method filters for only shiny titles (is_cms_shiny = 1) across all SOT types.
+        
+        Returns:
+            List of eligible titles that are shiny
+        """
+        query = get_shiny_eligible_titles_with_content_query(start_date, end_date, sot_types)
+        
+        if limit:
+            query += f" LIMIT {limit}"
+        
+        logger.info(
+            "fetching_shiny_eligible_titles_with_content",
+            start_date=start_date,
+            end_date=end_date,
+            sot_types=sot_types,
+            limit=limit,
+        )
+        
+        try:
+            with get_cursor() as cursor:
+                cursor.execute(query)
+                rows = cursor.fetchall()
+                
+                titles = [EligibleTitle.from_row(row) for row in rows]
+                
+                logger.info(
+                    "shiny_eligible_titles_with_content_fetched",
+                    count=len(titles),
+                    with_posters=sum(1 for t in titles if t.poster_img_url),
+                )
+                
+                return titles
+                
+        except Exception as exc:
+            logger.error(
+                "shiny_eligible_titles_content_query_failed",
+                error=str(exc),
+                error_type=type(exc).__name__,
+            )
+            raise DatabricksQueryError(f"Failed to fetch shiny eligible titles with content: {exc}") from exc
+    
+    def iter_shiny_eligible_titles_with_content(
+        self,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
+        sot_types: Optional[List[str]] = None,
+        batch_size: int = 500,
+        max_items: Optional[int] = None,
+    ) -> Generator[EligibleTitle, None, None]:
+        """
+        Stream shiny eligible titles with content info in batches.
+        
+        This method filters for only shiny titles (is_cms_shiny = 1) across all SOT types.
+        
+        Args:
+            start_date: Start of date range
+            end_date: End of date range
+            sot_types: Filter by specific SOT types
+            batch_size: Number of records per batch
+            max_items: Maximum total items to yield
+            
+        Yields:
+            EligibleTitle objects for shiny titles only
+        """
+        query = get_shiny_eligible_titles_with_content_query(start_date, end_date, sot_types)
+        
+        logger.info(
+            "streaming_shiny_eligible_titles",
+            start_date=start_date,
+            end_date=end_date,
+            sot_types=sot_types,
+            batch_size=batch_size,
+            max_items=max_items,
+        )
+        
+        try:
+            with get_cursor() as cursor:
+                cursor.execute(query)
+                
+                total_yielded = 0
+                while True:
+                    rows = cursor.fetchmany(batch_size)
+                    if not rows:
+                        break
+                    
+                    for row in rows:
+                        if max_items and total_yielded >= max_items:
+                            logger.info(
+                                "shiny_eligible_titles_stream_limit_reached",
+                                yielded=total_yielded,
+                            )
+                            return
+                        
+                        yield EligibleTitle.from_row(row)
+                        total_yielded += 1
+                
+                logger.info(
+                    "shiny_eligible_titles_stream_complete",
+                    total_yielded=total_yielded,
+                )
+                
+        except Exception as exc:
+            logger.error(
+                "shiny_eligible_titles_stream_failed",
+                error=str(exc),
+                error_type=type(exc).__name__,
+            )
+            raise DatabricksQueryError(f"Failed to stream shiny eligible titles: {exc}") from exc

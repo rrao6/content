@@ -298,6 +298,40 @@ def export_run(run_id):
     return send_file(filepath, as_attachment=True, download_name=filename)
 
 
+@app.route('/export/pdf/<int:run_id>')
+def export_run_pdf(run_id):
+    """Export results as PDF with composite images."""
+    from pdf_export import generate_run_pdf
+    
+    run = AnalysisRun.get_by_id(run_id)
+    if not run:
+        return "Run not found", 404
+    
+    results = PosterResult.get_by_run(run_id)
+    
+    # Get composite images directory
+    composite_images_dir = Path(__file__).parent.parent / "debug_composite_images"
+    
+    try:
+        # Generate PDF
+        pdf_path = generate_run_pdf(
+            run_id=run_id,
+            run_data=run,
+            results=results,
+            output_dir=app.config['EXPORT_FOLDER'],
+            composite_images_dir=str(composite_images_dir)
+        )
+        
+        return send_file(
+            pdf_path,
+            as_attachment=True,
+            download_name=pdf_path.name,
+            mimetype='application/pdf'
+        )
+    except Exception as e:
+        return f"PDF generation failed: {str(e)}", 500
+
+
 @app.route('/debug_composite_images/<path:filename>')
 def serve_composite_image(filename):
     """Serve composite debug images."""
@@ -343,8 +377,24 @@ def proxy_image():
         content_type = response.headers.get('content-type', 'image/jpeg')
         
         # Check if it's actually an image
+        # Note: img.adrise.tv returns 'application/octet-stream' for images,
+        # so we need to infer the type from the URL extension
         if not content_type.startswith('image/'):
-            return placeholder_image()
+            # Infer content type from URL extension
+            if url.lower().endswith('.jpg') or url.lower().endswith('.jpeg'):
+                content_type = 'image/jpeg'
+            elif url.lower().endswith('.png'):
+                content_type = 'image/png'
+            elif url.lower().endswith('.gif'):
+                content_type = 'image/gif'
+            elif url.lower().endswith('.webp'):
+                content_type = 'image/webp'
+            elif 'img.adrise.tv' in parsed.netloc:
+                # For adrise.tv, assume JPEG if no extension match
+                content_type = 'image/jpeg'
+            else:
+                # For other domains, reject non-image content types
+                return placeholder_image()
         
         # Stream back to client
         return Response(

@@ -212,3 +212,41 @@ SELECT
 FROM eligible_titles
 GROUP BY sot_name
 ORDER BY title_count DESC"""
+
+
+def get_shiny_eligible_titles_with_content_query(
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None,
+    sot_types: Optional[List[str]] = None,
+) -> str:
+    """
+    Get eligible titles joined with content_info, filtered by shiny status.
+    
+    This query ensures all results are shiny (is_cms_shiny = 1) across all SOT types.
+    
+    Returns query with program_id, sot_name, and poster_img_url for shiny titles only.
+    """
+    base_query = get_eligible_titles_query(start_date, end_date, sot_types)
+    
+    # Wrap the base query and join with content_info + shiny filter
+    return f"""
+WITH eligible_titles AS (
+{base_query}
+)
+SELECT DISTINCT 
+    et.program_id,
+    et.sot_name,
+    ci.content_id,
+    ci.content_name,
+    ci.content_type,
+    ci.poster_img_url,
+    p.is_cms_shiny
+FROM eligible_titles et
+JOIN core_prod.tubidw.content_info ci
+    ON et.program_id = ci.content_id
+JOIN core_prod.dsa.dsac_program_info p
+    ON et.program_id = p.program_id
+WHERE ci.poster_img_url IS NOT NULL
+    AND ci.active = true
+    AND p.is_cms_shiny = 1
+ORDER BY et.program_id"""

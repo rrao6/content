@@ -360,9 +360,11 @@ def analyze_eligible(
         # Filter SOT types if specified
         sot_types = list(sot_type) if sot_type else None
         
-        click.echo(f"Fetching eligible titles from last {days_back} days...")
+        click.echo(f"\n🔍 Fetching eligible titles from last {days_back} days...")
         if sot_types:
-            click.echo(f"Filtering by SOT types: {', '.join(sot_types)}")
+            click.echo(f"🎯 Filtering by SOT types: {', '.join(sot_types)}")
+        if limit:
+            click.echo(f"📊 Limit: {limit} posters")
         
         # Use the SOT pipeline which handles everything
         sot_pipeline = SOTAnalysisPipeline(
@@ -370,6 +372,8 @@ def analyze_eligible(
             content_service=content_service,
             analyzer=analyzer,
         )
+        
+        click.echo(f"\n🚀 Starting analysis pipeline...\n")
         
         # Run the pipeline
         results = sot_pipeline.run(
@@ -389,18 +393,19 @@ def analyze_eligible(
         processed = len(results)
         
         # Output results
-        click.echo(f"\nCompleted analysis of {processed} eligible posters")
+        click.echo(f"\n✅ Completed analysis of {processed} eligible posters")
         
         # Show summary by SOT
         sot_summary = sot_pipeline.get_summary_by_sot(results)
         
-        click.echo("\nResults by SOT:")
+        click.echo("\n📊 Results by SOT:")
         click.echo("-" * 60)
         for sot, stats in sorted(sot_summary.items()):
             total = stats["total"]
             with_elements = stats["with_key_elements"]
             pct = with_elements / total * 100 if total > 0 else 0
             click.echo(f"{sot:15} {with_elements:4}/{total:4} ({pct:5.1f}%) have elements in red zone")
+        click.echo("-" * 60)
         
         # Output results
         if output:
@@ -412,7 +417,8 @@ def analyze_eligible(
             output_data = json_lib.dumps(all_results, indent=2)
             if output_path:
                 output_path.write_text(output_data)
-                click.echo(f"\nWrote results to {output_path}")
+                click.echo(f"\n💾 Results saved to: {output_path}")
+                click.echo(f"📦 File size: {len(output_data)} bytes")
             else:
                 click.echo(output_data)
         else:
@@ -424,7 +430,8 @@ def analyze_eligible(
             output_data = "\n".join(lines)
             if output_path:
                 output_path.write_text(output_data)
-                click.echo(f"\nWrote results to {output_path}")
+                click.echo(f"\n💾 Results saved to: {output_path}")
+                click.echo(f"📦 File size: {len(output_data)} bytes")
             else:
                 click.echo(output_data)
                 

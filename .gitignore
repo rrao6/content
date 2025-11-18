@@ -37,13 +37,16 @@ logs/
 
 # Analysis outputs
 *.jsonl
-analysis_results.json
-posters_output.json
+*.json
+!package.json
+!package-lock.json
 sot_analysis_checkpoint.json
 eligible_titles.json
-red_zone_analysis_results.json
-sot_test_results.json
 debug_composite_images/
+
+# Exports
+exports/
+red-zone-dashboard/exports/
 
 # virtual env
 poster-analysis/

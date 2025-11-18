@@ -96,33 +96,91 @@ class AnalysisRun:
     
     @staticmethod
     def get_all(limit: int = 50) -> List[Dict[str, Any]]:
-        """Get all analysis runs."""
+        """Get all analysis runs with dynamically calculated pass/fail counts."""
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT * FROM analysis_runs 
-                ORDER BY id DESC 
+                SELECT 
+                    ar.*,
+                    COUNT(pr.id) as current_total,
+                    SUM(CASE WHEN pr.has_elements = 0 THEN 1 ELSE 0 END) as current_pass_count,
+                    SUM(CASE WHEN pr.has_elements = 1 THEN 1 ELSE 0 END) as current_fail_count
+                FROM analysis_runs ar
+                LEFT JOIN poster_results pr ON ar.id = pr.run_id
+                GROUP BY ar.id
+                ORDER BY ar.id DESC 
                 LIMIT ?
             """, (limit,))
-            return [dict(row) for row in cursor.fetchall()]
+            
+            results = []
+            for row in cursor.fetchall():
+                result = dict(row)
+                # Override stored counts with current counts
+                result['total_analyzed'] = result['current_total']
+                result['pass_count'] = result['current_pass_count']
+                result['fail_count'] = result['current_fail_count']
+                results.append(result)
+            return results
     
     @staticmethod
     def get_by_id(run_id: int) -> Optional[Dict[str, Any]]:
-        """Get a specific analysis run."""
+        """Get a specific analysis run with dynamically calculated pass/fail counts."""
         with get_db_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM analysis_runs WHERE id = ?", (run_id,))
+            
+            # Get run data with current counts
+            cursor.execute("""
+                SELECT 
+                    ar.*,
+                    COUNT(pr.id) as current_total,
+                    SUM(CASE WHEN pr.has_elements = 0 THEN 1 ELSE 0 END) as current_pass_count,
+                    SUM(CASE WHEN pr.has_elements = 1 THEN 1 ELSE 0 END) as current_fail_count
+                FROM analysis_runs ar
+                LEFT JOIN poster_results pr ON ar.id = pr.run_id
+                WHERE ar.id = ?
+                GROUP BY ar.id
+            """, (run_id,))
+            
             row = cursor.fetchone()
-            return dict(row) if row else None
+            if not row:
+                return None
+            
+            result = dict(row)
+            # Override stored counts with current counts
+            result['total_analyzed'] = result['current_total']
+            result['pass_count'] = result['current_pass_count']
+            result['fail_count'] = result['current_fail_count']
+            return result
     
     @staticmethod
     def get_latest() -> Optional[Dict[str, Any]]:
-        """Get the most recent analysis run."""
+        """Get the most recent analysis run with dynamically calculated pass/fail counts."""
         with get_db_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM analysis_runs ORDER BY id DESC LIMIT 1")
+            
+            # Get latest run with current counts
+            cursor.execute("""
+                SELECT 
+                    ar.*,
+                    COUNT(pr.id) as current_total,
+                    SUM(CASE WHEN pr.has_elements = 0 THEN 1 ELSE 0 END) as current_pass_count,
+                    SUM(CASE WHEN pr.has_elements = 1 THEN 1 ELSE 0 END) as current_fail_count
+                FROM analysis_runs ar
+                LEFT JOIN poster_results pr ON ar.id = pr.run_id
+                WHERE ar.id = (SELECT id FROM analysis_runs ORDER BY id DESC LIMIT 1)
+                GROUP BY ar.id
+            """)
+            
             row = cursor.fetchone()
-            return dict(row) if row else None
+            if not row:
+                return None
+            
+            result = dict(row)
+            # Override stored counts with current counts
+            result['total_analyzed'] = result['current_total']
+            result['pass_count'] = result['current_pass_count']
+            result['fail_count'] = result['current_fail_count']
+            return result
 
 
 class PosterResult:

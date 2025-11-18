@@ -59,6 +59,10 @@ def init_database():
         justification TEXT,
         analysis_json TEXT,  -- JSON string
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        qa_reviewed BOOLEAN DEFAULT 0,
+        qa_modified_at TIMESTAMP,
+        original_has_elements BOOLEAN,
+        original_justification TEXT,
         FOREIGN KEY (run_id) REFERENCES analysis_runs(id)
     );
 
@@ -68,6 +72,7 @@ def init_database():
     CREATE INDEX IF NOT EXISTS idx_has_elements ON poster_results(has_elements);
     CREATE INDEX IF NOT EXISTS idx_sot_name ON poster_results(sot_name);
     CREATE INDEX IF NOT EXISTS idx_created_at ON poster_results(created_at);
+    CREATE INDEX IF NOT EXISTS idx_qa_reviewed ON poster_results(qa_reviewed);
     """
     
     with get_db_connection() as conn:
@@ -262,6 +267,60 @@ class PosterResult:
                 }
                 for row in cursor.fetchall()
             ]
+    
+    @staticmethod
+    def update_qa_status(result_id: int, has_elements: bool, justification: str) -> bool:
+        """Update a result's QA status and values."""
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # First get the original values if not already stored
+            cursor.execute("""
+                SELECT has_elements, justification, original_has_elements, original_justification
+                FROM poster_results
+                WHERE id = ?
+            """, (result_id,))
+            
+            row = cursor.fetchone()
+            if not row:
+                return False
+            
+            current_has_elements, current_justification, orig_has_elements, orig_justification = row
+            
+            # Store original values if this is the first QA edit
+            if orig_has_elements is None:
+                orig_has_elements = current_has_elements
+                orig_justification = current_justification
+            
+            # Update the result
+            cursor.execute("""
+                UPDATE poster_results
+                SET has_elements = ?,
+                    justification = ?,
+                    qa_reviewed = 1,
+                    qa_modified_at = CURRENT_TIMESTAMP,
+                    original_has_elements = ?,
+                    original_justification = ?
+                WHERE id = ?
+            """, (has_elements, justification, orig_has_elements, orig_justification, result_id))
+            
+            logger.info(
+                "poster_result_qa_updated",
+                result_id=result_id,
+                has_elements=has_elements,
+                was_modified=True
+            )
+            
+            return True
+    
+    @staticmethod
+    def get_by_id(result_id: int) -> Optional[Dict[str, Any]]:
+        """Get a single poster result by ID."""
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM poster_results WHERE id = ?", (result_id,))
+            row = cursor.fetchone()
+            return dict(row) if row else None
 
 
 def import_json_results(json_file: Path, description: str = "") -> int:

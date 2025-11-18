@@ -170,6 +170,37 @@ def api_trending():
     return jsonify(data)
 
 
+@app.route('/api/result/<int:result_id>')
+def api_get_result(result_id):
+    """API endpoint to get a single result."""
+    result = PosterResult.get_by_id(result_id)
+    if not result:
+        return jsonify({"error": "Result not found"}), 404
+    return jsonify(result)
+
+
+@app.route('/api/result/<int:result_id>/qa', methods=['PUT'])
+def api_update_qa(result_id):
+    """API endpoint to update QA status of a result."""
+    data = request.json
+    
+    if 'has_elements' not in data or 'justification' not in data:
+        return jsonify({"error": "Missing required fields"}), 400
+    
+    has_elements = bool(data['has_elements'])
+    justification = data['justification']
+    
+    success = PosterResult.update_qa_status(result_id, has_elements, justification)
+    
+    if success:
+        return jsonify({
+            "success": True,
+            "message": "QA status updated successfully"
+        })
+    else:
+        return jsonify({"error": "Failed to update result"}), 500
+
+
 @app.route('/api/analyze', methods=['POST'])
 def api_analyze():
     """Trigger new analysis."""
@@ -283,11 +314,28 @@ def export_run(run_id):
     
     results = PosterResult.get_by_run(run_id)
     
+    # Add QA information to each result
+    for result in results:
+        result['sot_label'] = 'fail' if result.get('has_elements') else 'pass'
+        if result.get('qa_reviewed'):
+            result['qa_info'] = {
+                'reviewed': True,
+                'modified_at': result.get('qa_modified_at'),
+                'original_label': 'fail' if result.get('original_has_elements') else 'pass' if result.get('original_has_elements') is not None else None,
+                'original_justification': result.get('original_justification')
+            }
+        else:
+            result['qa_info'] = {'reviewed': False}
+    
     # Format for export
     export_data = {
         "run": run,
         "results": results,
-        "exported_at": datetime.now().isoformat()
+        "exported_at": datetime.now().isoformat(),
+        "qa_summary": {
+            "total_reviewed": sum(1 for r in results if r.get('qa_reviewed')),
+            "total_results": len(results)
+        }
     }
     
     # Save to file
@@ -359,7 +407,11 @@ def export_run_csv(run_id):
         'confidence',
         'explanation',
         'analysis_date',
-        'run_id'
+        'run_id',
+        'qa_reviewed',
+        'qa_modified_at',
+        'original_label',
+        'original_explanation'
     ])
     
     # Write data rows
@@ -367,6 +419,11 @@ def export_run_csv(run_id):
         # Determine pass/fail label
         has_elements = result.get('has_elements', True)
         sot_label = 'fail' if has_elements else 'pass'
+        
+        # Original label if QA reviewed
+        original_label = ''
+        if result.get('qa_reviewed') and result.get('original_has_elements') is not None:
+            original_label = 'fail' if result.get('original_has_elements') else 'pass'
         
         writer.writerow([
             result.get('content_id', ''),
@@ -379,7 +436,11 @@ def export_run_csv(run_id):
             result.get('confidence', ''),
             result.get('justification', ''),
             result.get('created_at', ''),
-            run_id
+            run_id,
+            'Yes' if result.get('qa_reviewed') else 'No',
+            result.get('qa_modified_at', ''),
+            original_label,
+            result.get('original_justification', '')
         ])
     
     # Prepare response

@@ -5,6 +5,7 @@ import json
 import csv
 from datetime import datetime
 from pathlib import Path
+from collections import OrderedDict
 from io import StringIO
 from flask import Flask, render_template, jsonify, request, send_file, redirect, url_for, Response
 import requests
@@ -51,6 +52,42 @@ def dashboard():
                          recent_runs=recent_runs)
 
 
+def _group_results_by_content(rows):
+    if not rows:
+        return []
+    grouped: dict[str, dict] = OrderedDict()
+    for row in rows:
+        key = str(row.get("content_id") or f"id:{row['id']}")
+        existing = grouped.get(key)
+        sot_name = row.get("sot_name")
+        if not existing:
+            new_row = dict(row)
+            new_row["sot_labels"] = []
+            if sot_name:
+                new_row["sot_labels"].append(sot_name)
+            grouped[key] = new_row
+        else:
+            if sot_name and sot_name not in existing["sot_labels"]:
+                existing["sot_labels"].append(sot_name)
+            # Prefer higher confidence/most recent analysis for display
+            if (row.get("confidence") or 0) > (existing.get("confidence") or 0):
+                for field in ("id", "sot_name", "justification", "analysis_json", "analysis"):
+                    if field in row:
+                        existing[field] = row[field]
+            if row.get("created_at") and not existing.get("created_at"):
+                existing["created_at"] = row["created_at"]
+    for entry in grouped.values():
+        labels = entry.get("sot_labels", [])
+        if labels:
+            labels_sorted = sorted(labels)
+            entry["sot_labels"] = labels_sorted
+            entry["sot_display"] = ", ".join(label.upper() for label in labels_sorted)
+            entry["sot_name"] = labels_sorted[0]
+        else:
+            entry["sot_display"] = (entry.get("sot_name") or "UNKNOWN").upper()
+    return list(grouped.values())
+
+
 @app.route('/results')
 @app.route('/results/<int:run_id>')
 def results(run_id=None):
@@ -88,8 +125,9 @@ def results(run_id=None):
     if request.args.get('search'):
         filters['search'] = request.args.get('search')
     
-    # Get results with filters
-    results = PosterResult.get_by_run(run_id, filters)
+    # Get results with filters and group by content
+    results_raw = PosterResult.get_by_run(run_id, filters)
+    results_grouped = _group_results_by_content(results_raw)
     
     # Get unique SOT names for filter dropdown
     with get_db_connection() as conn:
@@ -104,7 +142,7 @@ def results(run_id=None):
     
     return render_template('results.html',
                          run=run,
-                         results=results,
+                         results=results_grouped,
                          sot_names=sot_names,
                          filters=filters)
 
@@ -131,6 +169,16 @@ def detail(result_id):
     if result['analysis_json']:
         result['analysis'] = json.loads(result['analysis_json'])
     
+    # Fetch all SOT labels for this content/run to show aggregated badges
+    if result.get('content_id') and result.get('run_id'):
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT DISTINCT sot_name 
+                FROM poster_results 
+                WHERE run_id = ? AND content_id = ?
+            """, (result['run_id'], result['content_id']))
+            result['sot_labels'] = [row[0] for row in cursor.fetchall()]
     return render_template('detail.html', result=result)
 
 

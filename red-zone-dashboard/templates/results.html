@@ -190,7 +190,17 @@
                         <span class="text-gray-500">
                             <i class="fas fa-tag mr-1"></i>SOT:
                         </span>
-                        <span class="font-medium">{{ result.sot_name|upper }}</span>
+                        <div class="flex flex-wrap gap-1 justify-end">
+                            {% if result.sot_labels %}
+                                {% for label in result.sot_labels %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                    {{ label|upper }}
+                                </span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="font-medium">{{ result.sot_name|upper }}</span>
+                            {% endif %}
+                        </div>
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-gray-500">

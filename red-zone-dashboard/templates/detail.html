@@ -150,7 +150,19 @@
                     </div>
                     <div>
                         <dt class="text-gray-500">Source of Truth</dt>
-                        <dd class="font-medium text-gray-900">{{ result.sot_name|upper }}</dd>
+                        <dd class="font-medium text-gray-900">
+                            <div class="flex flex-wrap gap-2">
+                                {% if result.sot_labels %}
+                                    {% for label in result.sot_labels %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                        {{ label|upper }}
+                                    </span>
+                                    {% endfor %}
+                                {% else %}
+                                    {{ result.sot_name|upper }}
+                                {% endif %}
+                            </div>
+                        </dd>
                     </div>
                     <div>
                         <dt class="text-gray-500">Analysis Date</dt>

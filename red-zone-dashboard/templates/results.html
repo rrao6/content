@@ -257,6 +257,7 @@
     // Position red zone overlay based on actual image dimensions
     function positionRedZone(img) {
         if (!img || !img.parentElement) return;
+        if (img.classList.contains('composite-image')) return;
         
         // Find the overlay in the same wrapper
         const wrapper = img.closest('.poster-wrapper');
@@ -303,26 +304,20 @@
             overlay.style.top = offsetY + 'px';
             overlay.style.width = zoneWidth + 'px';
             overlay.style.height = zoneHeight + 'px';
-            
-            console.log('Red zone positioned:', {
-                imageSize: [renderedWidth, renderedHeight],
-                offset: [offsetX, offsetY],
-                zoneSize: [zoneWidth, zoneHeight],
-                contentId: wrapper.closest('[data-content-id]')?.dataset.contentId
-            });
+            overlay.classList.add('ready');
+        } else {
+            overlay.classList.remove('ready');
         }
     }
     
     // Position all red zones
     function positionAllRedZones() {
-        document.querySelectorAll('.poster-image').forEach(function(img) {
-            // Skip hidden composite images
+        document.querySelectorAll('.poster-image.original-image').forEach(function(img) {
             if (img.style.display === 'none') return;
             
             if (img.complete && img.naturalHeight !== 0) {
                 positionRedZone(img);
             } else {
-                // If not loaded yet, wait a bit and try again
                 setTimeout(() => positionRedZone(img), 100);
             }
         });
@@ -330,6 +325,19 @@
     
     // Re-position all red zones on window resize
     window.addEventListener('resize', positionAllRedZones);
+    
+    if ('ResizeObserver' in window) {
+        const resizeObserver = new ResizeObserver(entries => {
+            entries.forEach(entry => {
+                const wrapper = entry.target;
+                const img = wrapper.querySelector('.poster-image.original-image');
+                if (img) {
+                    requestAnimationFrame(() => positionRedZone(img));
+                }
+            });
+        });
+        document.querySelectorAll('.poster-wrapper').forEach(wrapper => resizeObserver.observe(wrapper));
+    }
     
     // Position red zones when DOM is ready
     document.addEventListener('DOMContentLoaded', function() {
@@ -361,6 +369,13 @@
         const overlays = document.querySelectorAll('.red-zone-overlay');
         overlays.forEach(overlay => {
             overlay.style.display = show ? 'block' : 'none';
+            if (show && overlay.classList.contains('ready')) {
+                const wrapper = overlay.closest('.poster-wrapper');
+                const img = wrapper?.querySelector('.poster-image.original-image');
+                if (img) {
+                    requestAnimationFrame(() => positionRedZone(img));
+                }
+            }
         });
         console.log('Red zones ' + (show ? 'shown' : 'hidden'));
     }
@@ -375,26 +390,26 @@
             const compositeImg = container.querySelector('.composite-image');
             const redZone = container.querySelector('.red-zone-overlay');
             
-            if (originalImg && compositeImg) {
-                if (show) {
-                    // Show composite (which has red zone baked in)
-                    compositeImg.style.visibility = 'visible';
-                    // Always hide CSS red zone overlay when showing composite
-                    if (redZone) redZone.style.opacity = '0';
-                } else {
-                    // Hide composite
-                    compositeImg.style.visibility = 'hidden';
-                    // Restore red zone overlay visibility based on current toggle state
-                    if (redZone) {
-                        redZone.style.opacity = showRedZones ? '1' : '0';
+            if (!originalImg || !compositeImg) return;
+            
+            if (show) {
+                compositeImg.style.visibility = 'visible';
+                if (redZone) {
+                    redZone.style.display = 'none';
+                }
+            } else {
+                compositeImg.style.visibility = 'hidden';
+                if (redZone) {
+                    redZone.style.display = showRedZones ? 'block' : 'none';
+                    if (showRedZones) {
+                        requestAnimationFrame(() => positionRedZone(originalImg));
                     }
                 }
             }
         });
         
-        // Reposition all red zones after toggle (only if not showing composite and red zones are on)
         if (!show && showRedZones) {
-            setTimeout(positionAllRedZones, 100);
+            requestAnimationFrame(positionAllRedZones);
         }
         
         console.log('Composite images ' + (show ? 'shown' : 'hidden'));

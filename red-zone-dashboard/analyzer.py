@@ -25,7 +25,7 @@ class DashboardAnalyzer:
     """Wrapper for running analysis from the dashboard."""
     
     # Safety limits for QA
-    MAX_BATCH_SIZE = 100
+    MAX_BATCH_SIZE = 200
     DEFAULT_BATCH_SIZE = 50
     VALID_SOTS = {
         "imdb",
@@ -91,6 +91,7 @@ class DashboardAnalyzer:
         use_cache: bool = True,
         batch_size: Optional[int] = None,
         progress_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
+        shiny_only: bool = False,
     ) -> Dict[str, Any]:
         """Run analysis and store results in database."""
         if not self.is_available():
@@ -123,6 +124,7 @@ class DashboardAnalyzer:
                 limit=limit,
                 batch_size=min(batch_size or self.pipeline.config.sot_batch_size, self.MAX_BATCH_SIZE),
                 progress_callback=progress_callback,
+                shiny_only=shiny_only,
             )
             
             if not results:
@@ -142,7 +144,8 @@ class DashboardAnalyzer:
                 "sot_types": normalized_sots,
                 "days_back": days_back,
                 "limit": limit,
-                "use_cache": use_cache
+                "use_cache": use_cache,
+                "shiny_only": shiny_only,
             }
             
             run_id = AnalysisRun.create(

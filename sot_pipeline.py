@@ -121,6 +121,7 @@ class SOTAnalysisPipeline:
         save_composite_images: bool = False,
         composite_image_dir: str = "./debug_composite_images",
         progress_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
+        shiny_only: bool = False,
     ) -> List[SOTAnalysisResult]:
         """
         Run analysis on eligible titles.
@@ -210,7 +211,7 @@ class SOTAnalysisPipeline:
         print(f"{'='*70}\n")
         report_progress(
             event="started",
-            message=f"Starting analysis for {limit or 'unknown'} titles",
+            message=f"Starting {'shiny ' if shiny_only else ''}analysis for {limit or 'unknown'} titles",
         )
         
         logger.info(
@@ -221,12 +222,20 @@ class SOTAnalysisPipeline:
         
         print("🔍 Fetching eligible titles from database...")
         report_progress("fetching_titles", message="Fetching eligible titles from database...")
-        eligible_gen = self.eligible_service.iter_eligible_poster_images(
-            days_back=days_back,
-            sot_types=sot_types,
-            batch_size=batch_size,
-            max_items=limit,
-        )
+        if shiny_only:
+            eligible_gen = self.eligible_service.iter_shiny_eligible_poster_images(
+                days_back=days_back,
+                sot_types=sot_types,
+                batch_size=batch_size,
+                max_items=limit,
+            )
+        else:
+            eligible_gen = self.eligible_service.iter_eligible_poster_images(
+                days_back=days_back,
+                sot_types=sot_types,
+                batch_size=batch_size,
+                max_items=limit,
+            )
         
         # Process titles
         results: List[SOTAnalysisResult] = []

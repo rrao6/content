@@ -214,6 +214,7 @@ def api_analyze():
     description = data.get('description', '')
     use_cache = data.get('use_cache', True)
     batch_size = data.get('batch_size')
+    shiny_only = data.get('shiny_only')
     
     try:
         days_back = int(days_back)
@@ -232,6 +233,11 @@ def api_analyze():
         except (TypeError, ValueError):
             batch_size = None
     
+    if isinstance(shiny_only, str):
+        shiny_only = shiny_only.lower() in {"1", "true", "yes", "on"}
+    else:
+        shiny_only = bool(shiny_only)
+    
     if is_analysis_available():
         job = start_analysis_job({
             "sot_types": sot_types,
@@ -240,6 +246,7 @@ def api_analyze():
             "description": description,
             "use_cache": use_cache,
             "batch_size": batch_size,
+            "shiny_only": shiny_only,
         })
         return jsonify({
             "status": "accepted",

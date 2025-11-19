@@ -56,12 +56,26 @@
                     <label for="limit" class="block text-sm font-medium text-gray-700">
                         Batch Size
                     </label>
-                    <input type="number" id="limit" name="limit" value="50" min="1" max="100"
+                    <input type="number" id="limit" name="limit" value="50" min="1" max="200"
                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
                     <p class="mt-1 text-xs text-gray-500">
-                        Maximum 100 posters per batch for QA. Start with smaller batches (25-50) to optimize.
+                        Maximum 200 posters per batch. Start with smaller batches (25-50) to optimize.
                     </p>
                 </div>
+            </div>
+            
+            <!-- Shiny Toggle -->
+            <div class="border rounded-lg p-4 bg-gray-50">
+                <h3 class="text-sm font-medium text-gray-800 mb-2">
+                    Shiny Titles
+                </h3>
+                <p class="text-xs text-gray-500 mb-3">
+                    Shiny titles are CMS-approved hero posters. Enable this option to only analyze shiny-verified content.
+                </p>
+                <label class="inline-flex items-center space-x-2">
+                    <input type="checkbox" name="shiny_only" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <span class="text-sm text-gray-700">Analyze shiny titles only</span>
+                </label>
             </div>
             
             <!-- Description -->
@@ -165,7 +179,8 @@
             days_back: parseInt(formData.get('days_back'), 10),
             limit: parseInt(formData.get('limit'), 10),
             description: formData.get('description'),
-            use_cache: formData.get('use_cache') === 'on'
+            use_cache: formData.get('use_cache') === 'on',
+            shiny_only: formData.get('shiny_only') === 'on'
         };
         
         if (isNaN(payload.days_back) || payload.days_back <= 0) {

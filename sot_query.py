@@ -113,28 +113,28 @@ WITH params AS (
     
     if "award" in selected_sots:
         unions.append("""
-    SELECT 
+    SELECT DISTINCT 
         program_id,
         'award' AS sot_name
     FROM core_dev.dsa.dsa_raw_yixinc_award_df""")
     
     if "vibe" in selected_sots:
         unions.append("""
-    SELECT 
+    SELECT DISTINCT 
         id AS program_id,
         'vibe' AS sot_name
     FROM core_dev.dsa_stg.yixinc_vibe_df""")
     
     if "narrative" in selected_sots:
         unions.append("""
-    SELECT 
+    SELECT DISTINCT 
         id AS program_id,
         'narrative' AS sot_name
     FROM core_dev.dsa_stg.yixinc_narrative_df""")
     
     if "most_liked" in selected_sots:
         unions.append("""
-    SELECT 
+    SELECT DISTINCT 
         content_id_value AS program_id,
         'most_liked' AS sot_name
     FROM core_prod.tensor_cdc.container_items 

@@ -171,6 +171,12 @@
                             <a href="{{ url_for('export_run', run_id=run.id) }}" class="text-gray-600 hover:text-gray-900" title="Export JSON">
                                 <i class="fas fa-file-code"></i>
                             </a>
+                            <button type="button"
+                                    class="ml-3 text-red-600 hover:text-red-900"
+                                    title="Delete Run"
+                                    onclick="deleteRun({{ run.id }}, { reload: true })">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -243,5 +249,35 @@
             }
         }
     });
+
+    function formatDate(dateStr) {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+
+    async function deleteRun(runId, options = {}) {
+        const { redirectUrl = null, reload = false } = options;
+        if (!confirm('Delete this run and all associated results? This cannot be undone.')) {
+            return;
+        }
+        try {
+            const response = await fetch(`/runs/${runId}/delete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || 'Failed to delete run');
+            }
+            showToast('Run deleted successfully', 'success');
+            if (redirectUrl) {
+                window.location.href = redirectUrl;
+            } else if (reload) {
+                window.location.reload();
+            }
+        } catch (error) {
+            showToast(error.message, 'error');
+        }
+    }
 </script>
 {% endblock %}

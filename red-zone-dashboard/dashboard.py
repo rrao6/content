@@ -14,7 +14,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from database import (
     init_database, AnalysisRun, PosterResult, 
-    import_json_results, get_db_connection
+    import_json_results, get_db_connection, delete_run
 )
 from analyzer import is_analysis_available
 from analysis_jobs import start_analysis_job, get_job_status
@@ -304,6 +304,14 @@ def api_analyze_status(job_id):
     if not status:
         return jsonify({"error": "Job not found"}), 404
     return jsonify(status)
+
+
+@app.route('/runs/<int:run_id>/delete', methods=['POST'])
+def delete_run_route(run_id):
+    """Delete a run and its results."""
+    if delete_run(run_id):
+        return jsonify({"success": True})
+    return jsonify({"success": False, "error": "Run not found"}), 404
 
 
 @app.route('/analyze')

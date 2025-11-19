@@ -416,6 +416,20 @@ def import_json_results(json_file: Path, description: str = "") -> int:
     return run_id
 
 
+def delete_run(run_id: int) -> bool:
+    """Delete a run and all associated poster results."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1 FROM analysis_runs WHERE id = ?", (run_id,))
+        if not cursor.fetchone():
+            return False
+        
+        cursor.execute("DELETE FROM poster_results WHERE run_id = ?", (run_id,))
+        cursor.execute("DELETE FROM analysis_runs WHERE id = ?", (run_id,))
+        logger.info("analysis_run_deleted", run_id=run_id)
+        return True
+
+
 if __name__ == "__main__":
     # Initialize database when run directly
     init_database()

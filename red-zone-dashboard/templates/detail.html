@@ -355,6 +355,9 @@
             overlay.style.top = offsetY + 'px';
             overlay.style.width = zoneWidth + 'px';
             overlay.style.height = zoneHeight + 'px';
+            overlay.style.display = 'block';
+            overlay.style.opacity = (!compositeVisible && redZoneVisible) ? '1' : '0';
+            overlay.classList.add('ready');
             
             console.log('Red zone positioned on detail view:', {
                 imageSize: [renderedWidth, renderedHeight],
@@ -362,6 +365,8 @@
                 zoneSize: [zoneWidth, zoneHeight],
                 contentId: '{{ result.content_id }}'
             });
+        } else {
+            overlay.classList.remove('ready');
         }
     }
     
@@ -421,13 +426,17 @@
                 // Show composite (which has red zone baked in)
                 compositeImg.style.visibility = 'visible';
                 // Always hide CSS red zone overlay when showing composite
-                if (overlay) overlay.style.opacity = '0';
+                if (overlay) {
+                    overlay.style.opacity = '0';
+                    overlay.style.display = 'none';
+                }
                 toggleText.textContent = 'Hide GPT View';
             } else {
                 // Hide composite
                 compositeImg.style.visibility = 'hidden';
                 // Restore red zone overlay visibility based on current toggle state
                 if (overlay) {
+                    overlay.style.display = 'block';
                     overlay.style.opacity = redZoneVisible ? '1' : '0';
                 }
                 toggleText.textContent = 'Show GPT View';

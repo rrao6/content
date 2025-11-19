@@ -156,6 +156,7 @@
 
 {% block extra_scripts %}
 <script>
+    const JOB_STORAGE_KEY = 'active_analysis_job';
     let jobPollHandle = null;
     let currentJobId = null;
     
@@ -219,9 +220,7 @@
             const result = await response.json();
             
             if (result.status === 'accepted' && result.job_id) {
-                currentJobId = result.job_id;
-                appendProgressLog('Job accepted. Preparing analysis...');
-                startPollingStatus(currentJobId);
+                startJobTracking(result.job_id);
             } else if (result.status === 'success' && result.run_id) {
                 appendProgressLog(result.message || 'Analysis completed. Redirecting to results...');
                 progressBar.style.width = '100%';
@@ -235,6 +234,15 @@
             resetProgressUI();
         }
     });
+    
+    function startJobTracking(jobId, { resumed = false } = {}) {
+        currentJobId = jobId;
+        localStorage.setItem(JOB_STORAGE_KEY, jobId);
+        progressSection.classList.remove('hidden');
+        analysisForm.style.display = 'none';
+        appendProgressLog(resumed ? 'Resuming analysis progress...' : 'Job accepted. Preparing analysis...');
+        startPollingStatus(jobId);
+    }
     
     function startPollingStatus(jobId) {
         if (jobPollHandle) {
@@ -256,10 +264,12 @@
             
             if (status.status === 'completed' && status.run_id) {
                 clearInterval(jobPollHandle);
+                localStorage.removeItem(JOB_STORAGE_KEY);
                 appendProgressLog('Analysis complete. Redirecting to results...');
                 setTimeout(() => window.location.href = `/results/${status.run_id}`, 1500);
             } else if (status.status === 'failed') {
                 clearInterval(jobPollHandle);
+                localStorage.removeItem(JOB_STORAGE_KEY);
                 showToast(status.error || 'Analysis failed.', 'error');
                 appendProgressLog(status.error || 'Analysis failed.');
                 resetProgressUI(true);
@@ -308,6 +318,14 @@
         if (!keepLogs) {
             progressLog.innerHTML = '';
         }
+        localStorage.removeItem(JOB_STORAGE_KEY);
     }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const storedJobId = localStorage.getItem(JOB_STORAGE_KEY);
+        if (storedJobId) {
+            startJobTracking(storedJobId, { resumed: true });
+        }
+    });
 </script>
 {% endblock %}

@@ -3,7 +3,7 @@ import json
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any, Callable, Set
 from dataclasses import dataclass, field
 
 import structlog
@@ -55,6 +55,7 @@ class SOTAnalysisCheckpoint:
     error_count: int
     processed_ids: List[int] = field(default_factory=list)
     errors: Dict[int, str] = field(default_factory=dict)
+    processed_pairs: List[str] = field(default_factory=list)
     
     def save(self, path: Path) -> None:
         """Save checkpoint to file."""
@@ -67,6 +68,7 @@ class SOTAnalysisCheckpoint:
             "error_count": self.error_count,
             "processed_ids": self.processed_ids,
             "errors": self.errors,
+            "processed_pairs": self.processed_pairs,
         }
         path.write_text(json.dumps(data, indent=2))
     
@@ -87,6 +89,7 @@ class SOTAnalysisCheckpoint:
                 error_count=data["error_count"],
                 processed_ids=data["processed_ids"],
                 errors=data["errors"],
+                processed_pairs=data.get("processed_pairs", []),
             )
         except Exception as exc:
             logger.error("checkpoint_load_failed", error=str(exc))
@@ -177,12 +180,10 @@ class SOTAnalysisPipeline:
         
         # Load checkpoint if resuming
         checkpoint = None
-        processed_set = set()
         
         if resume and self.checkpoint_path.exists():
             checkpoint = SOTAnalysisCheckpoint.load(self.checkpoint_path)
             if checkpoint:
-                processed_set = set(checkpoint.processed_ids)
                 logger.info(
                     "resuming_from_checkpoint",
                     processed=checkpoint.processed_count,
@@ -241,8 +242,16 @@ class SOTAnalysisPipeline:
         results: List[SOTAnalysisResult] = []
         batch: List[EligibleTitle] = []
         start_time = time.time()
+        processed_pairs_set = set(checkpoint.processed_pairs)
+        pending_pairs: Set[str] = set()
         
         def handle_result(result: SOTAnalysisResult) -> None:
+            key = self._make_result_key(result.content_id, result.sot_name)
+            pending_pairs.discard(key)
+            if key not in processed_pairs_set:
+                processed_pairs_set.add(key)
+                checkpoint.processed_pairs.append(key)
+            
             checkpoint.processed_count += 1
             checkpoint.processed_ids.append(result.content_id)
             
@@ -262,8 +271,12 @@ class SOTAnalysisPipeline:
         
         for eligible_title in eligible_gen:
             # Skip if already processed
-            if eligible_title.content_id in processed_set:
+            content_id = eligible_title.content_id if eligible_title.content_id is not None else eligible_title.program_id
+            key = self._make_result_key(content_id, eligible_title.sot_name)
+            if key in processed_pairs_set or key in pending_pairs:
                 continue
+            
+            pending_pairs.add(key)
             
             batch.append(eligible_title)
             
@@ -534,3 +547,8 @@ class SOTAnalysisPipeline:
                     summary[sot]["low_confidence"] += 1
         
         return summary
+
+    @staticmethod
+    def _make_result_key(content_id: Optional[int], sot_name: Optional[str]) -> str:
+        base_id = content_id if content_id is not None else "unknown"
+        return f"{base_id}:{sot_name or 'unknown'}"

@@ -4,7 +4,7 @@ import sys
 import json
 from pathlib import Path
 from datetime import datetime
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Callable
 
 # Add parent directory to path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -27,6 +27,30 @@ class DashboardAnalyzer:
     # Safety limits for QA
     MAX_BATCH_SIZE = 100
     DEFAULT_BATCH_SIZE = 50
+    VALID_SOTS = {
+        "imdb",
+        "rt",
+        "award",
+        "vibe",
+        "narrative",
+        "most_liked",
+        "just_added",
+        "leaving_soon",
+    }
+    SOT_TYPE_MAP = {
+        "imdb": "imdb",
+        "rotten_tomatoes": "rt",
+        "rt": "rt",
+        "just_added": "just_added",
+        "leaving_soon": "leaving_soon",
+        "most_popular": "most_liked",
+        "most_liked": "most_liked",
+        "awards": "award",
+        "award": "award",
+        "top_rated": "narrative",
+        "narrative": "narrative",
+        "vibe": "vibe",
+    }
     
     def __init__(self):
         """Initialize the analyzer."""
@@ -64,13 +88,22 @@ class DashboardAnalyzer:
         days_back: int = 7,
         limit: Optional[int] = None,
         description: str = "",
-        use_cache: bool = True
+        use_cache: bool = True,
+        batch_size: Optional[int] = None,
+        progress_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
     ) -> Dict[str, Any]:
         """Run analysis and store results in database."""
         if not self.is_available():
             return {
                 "status": "error",
                 "message": "Analysis pipeline not available"
+            }
+        
+        normalized_sots = self._normalize_sot_types(sot_types)
+        if not normalized_sots:
+            return {
+                "status": "error",
+                "message": "No valid Source of Truth selections were provided."
             }
         
         # Enforce batch size limits for QA
@@ -85,9 +118,11 @@ class DashboardAnalyzer:
         try:
             # Run analysis through pipeline
             results = self.pipeline.run(
-                sot_types=sot_types,
+                sot_types=normalized_sots,
                 days_back=days_back,
-                limit=limit
+                limit=limit,
+                batch_size=min(batch_size or self.pipeline.config.sot_batch_size, self.MAX_BATCH_SIZE),
+                progress_callback=progress_callback,
             )
             
             if not results:
@@ -103,7 +138,8 @@ class DashboardAnalyzer:
             
             # Create analysis run in database
             parameters = {
-                "sot_types": sot_types,
+                "requested_sot_types": sot_types,
+                "sot_types": normalized_sots,
                 "days_back": days_back,
                 "limit": limit,
                 "use_cache": use_cache
@@ -120,14 +156,17 @@ class DashboardAnalyzer:
             # Convert results to database format
             db_results = []
             for result in results:
+                analysis_payload = result.analysis or {}
                 db_results.append({
-                    "content_id": result.eligible_title.content_id,
-                    "program_id": result.eligible_title.program_id,
-                    "title": result.eligible_title.title,
-                    "content_type": result.eligible_title.content_type,
-                    "sot_name": result.eligible_title.sot_name,
-                    "poster_url": result.poster_image.url if result.poster_image else None,
-                    "analysis": result.analysis
+                    "content_id": result.content_id,
+                    "program_id": result.program_id,
+                    "content_name": result.content_name,
+                    "content_type": result.content_type,
+                    "sot_name": result.sot_name,
+                    "poster_img_url": result.poster_img_url,
+                    "poster_url": result.poster_img_url,
+                    "analysis": analysis_payload,
+                    "error": result.error,
                 })
             
             # Store results in database
@@ -160,6 +199,14 @@ class DashboardAnalyzer:
             "awards",
             "top_rated"
         ]
+    
+    def _normalize_sot_types(self, sot_types: List[str]) -> List[str]:
+        normalized: List[str] = []
+        for sot in sot_types or []:
+            mapped = self.SOT_TYPE_MAP.get(sot, sot)
+            if mapped in self.VALID_SOTS and mapped not in normalized:
+                normalized.append(mapped)
+        return normalized
     
     def export_run_data(self, run_id: int) -> Dict[str, Any]:
         """Export all data for a specific run."""

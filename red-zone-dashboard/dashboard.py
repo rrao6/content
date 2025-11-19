@@ -16,6 +16,8 @@ from database import (
     init_database, AnalysisRun, PosterResult, 
     import_json_results, get_db_connection
 )
+from analyzer import is_analysis_available
+from analysis_jobs import start_analysis_job, get_job_status
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
@@ -204,66 +206,97 @@ def api_update_qa(result_id):
 @app.route('/api/analyze', methods=['POST'])
 def api_analyze():
     """Trigger new analysis."""
-    from analyzer import analyzer, is_analysis_available
+    data = request.json or {}
     
-    # Always try real analysis first
-    if is_analysis_available():
-        data = request.json
-        
-        result = analyzer.run_analysis(
-            sot_types=data.get('sot_types', ['just_added']),
-            days_back=data.get('days_back', 7),
-            limit=data.get('limit'),
-            description=data.get('description', ''),
-            use_cache=data.get('use_cache', True)
-        )
-        return jsonify(result)
-    else:
-        # If analysis isn't available, create a demo run with test data
-        import random
-        from pathlib import Path
-        
-        # Generate demo data
-        num_posters = request.json.get('limit', 50)
-        sot_types = request.json.get('sot_types', ['just_added'])
-        description = request.json.get('description', 'Demo analysis run')
-        
-        # Create fake results
-        results = []
-        for i in range(num_posters):
-            has_elements = random.random() > 0.2  # 80% fail rate
-            results.append({
-                "content_id": 300000 + i,
-                "program_id": 400000 + i, 
-                "content_name": f"Demo Content {i:04d}",
-                "content_type": "movie" if i % 3 != 0 else "series",
-                "sot_name": random.choice(sot_types),
-                "poster_img_url": f"https://via.placeholder.com/270x480/{'ff6b6b' if has_elements else '51cf66'}/ffffff?text=Demo+{i:04d}",
-                "analysis": {
-                    "red_safe_zone": {
-                        "contains_key_elements": has_elements,
-                        "confidence": random.randint(85, 99),
-                        "justification": "Demo analysis result"
-                    }
-                }
-            })
-        
-        # Save and import
-        demo_file = Path(app.config['UPLOAD_FOLDER']) / f"demo_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        with open(demo_file, 'w') as f:
-            json.dump(results, f)
-        
+    sot_types = data.get('sot_types') or ['just_added']
+    days_back = data.get('days_back', 7)
+    limit = data.get('limit')
+    description = data.get('description', '')
+    use_cache = data.get('use_cache', True)
+    batch_size = data.get('batch_size')
+    
+    try:
+        days_back = int(days_back)
+    except (TypeError, ValueError):
+        return jsonify({"status": "error", "message": "days_back must be an integer"}), 400
+    
+    if limit is not None:
         try:
-            run_id = import_json_results(demo_file, description)
-            return jsonify({
-                "status": "success",
-                "run_id": run_id,
-                "message": f"Demo analysis completed with {num_posters} posters",
-                "is_demo": True
-            })
-        finally:
-            if demo_file.exists():
-                demo_file.unlink()
+            limit = int(limit)
+        except (TypeError, ValueError):
+            return jsonify({"status": "error", "message": "limit must be an integer"}), 400
+    
+    if batch_size is not None:
+        try:
+            batch_size = int(batch_size)
+        except (TypeError, ValueError):
+            batch_size = None
+    
+    if is_analysis_available():
+        job = start_analysis_job({
+            "sot_types": sot_types,
+            "days_back": days_back,
+            "limit": limit,
+            "description": description,
+            "use_cache": use_cache,
+            "batch_size": batch_size,
+        })
+        return jsonify({
+            "status": "accepted",
+            "job_id": job.id,
+        })
+    
+    # If analysis isn't available, create a demo run with test data
+    import random
+    from pathlib import Path
+    
+    num_posters = limit or 50
+    sot_types = sot_types or ['just_added']
+    description = description or 'Demo analysis run'
+    
+    results = []
+    for i in range(num_posters):
+        has_elements = random.random() > 0.2  # 80% fail rate
+        results.append({
+            "content_id": 300000 + i,
+            "program_id": 400000 + i, 
+            "content_name": f"Demo Content {i:04d}",
+            "content_type": "movie" if i % 3 != 0 else "series",
+            "sot_name": random.choice(sot_types),
+            "poster_img_url": f"https://via.placeholder.com/270x480/{'ff6b6b' if has_elements else '51cf66'}/ffffff?text=Demo+{i:04d}",
+            "analysis": {
+                "red_safe_zone": {
+                    "contains_key_elements": has_elements,
+                    "confidence": random.randint(85, 99),
+                    "justification": "Demo analysis result"
+                }
+            }
+        })
+    
+    demo_file = Path(app.config['UPLOAD_FOLDER']) / f"demo_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    with open(demo_file, 'w') as f:
+        json.dump(results, f)
+    
+    try:
+        run_id = import_json_results(demo_file, description)
+        return jsonify({
+            "status": "success",
+            "run_id": run_id,
+            "message": f"Demo analysis completed with {num_posters} posters",
+            "is_demo": True
+        })
+    finally:
+        if demo_file.exists():
+            demo_file.unlink()
+
+
+@app.route('/api/analyze/status/<job_id>')
+def api_analyze_status(job_id):
+    """Return status updates for a running analysis job."""
+    status = get_job_status(job_id)
+    if not status:
+        return jsonify({"error": "Job not found"}), 404
+    return jsonify(status)
 
 
 @app.route('/analyze')

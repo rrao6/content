@@ -142,128 +142,157 @@
 
 {% block extra_scripts %}
 <script>
+    let jobPollHandle = null;
+    let currentJobId = null;
+    
     function toggleAdvanced() {
         const advanced = document.getElementById('advancedOptions');
         advanced.classList.toggle('hidden');
     }
     
-    document.getElementById('analysisForm').addEventListener('submit', async function(e) {
+    const analysisForm = document.getElementById('analysisForm');
+    const progressSection = document.getElementById('progressSection');
+    const progressText = document.getElementById('progressText');
+    const progressBar = document.getElementById('progressBar');
+    const progressLog = document.getElementById('progressLog');
+    
+    analysisForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // Get form data
         const formData = new FormData(this);
-        const data = {};
+        const payload = {
+            sot_types: [],
+            days_back: parseInt(formData.get('days_back'), 10),
+            limit: parseInt(formData.get('limit'), 10),
+            description: formData.get('description'),
+            use_cache: formData.get('use_cache') === 'on'
+        };
         
-        // Get selected SOTs
-        data.sot_types = [];
+        if (isNaN(payload.days_back) || payload.days_back <= 0) {
+            showToast('Please enter a valid number of days to look back.', 'error');
+            return;
+        }
+        if (isNaN(payload.limit) || payload.limit <= 0) {
+            payload.limit = undefined;
+        }
+        
         document.querySelectorAll('input[name="sot"]:checked').forEach(checkbox => {
-            data.sot_types.push(checkbox.value);
+            payload.sot_types.push(checkbox.value);
         });
         
-        if (data.sot_types.length === 0) {
+        if (payload.sot_types.length === 0) {
             showToast('Please select at least one Source of Truth', 'error');
             return;
         }
         
-        // Get other fields
-        data.days_back = parseInt(formData.get('days_back'));
-        data.limit = parseInt(formData.get('limit'));
-        data.description = formData.get('description');
-        data.model = formData.get('model');
-        data.use_cache = formData.get('use_cache') === 'on';
-        
-        // Show progress section
-        document.getElementById('progressSection').classList.remove('hidden');
+        // Reset progress UI
+        progressLog.innerHTML = '';
+        progressBar.style.width = '0%';
+        progressText.textContent = '0%';
+        progressSection.classList.remove('hidden');
         this.style.display = 'none';
         
-        // Start progress simulation
-        const progressInterval = simulateProgress();
-        
-        // Start analysis
         try {
             const response = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(payload)
             });
             
             const result = await response.json();
             
-            if (result.status === 'success') {
-                // Stop progress simulation
-                clearInterval(progressInterval);
-                
-                // Update progress
-                updateProgress(100, result.message || 'Analysis completed successfully!');
-                
-                // Show completion message
-                if (result.is_demo) {
-                    updateProgress(100, 'Demo data generated. Redirecting to results...');
-                }
-                
-                // Redirect to results
-                setTimeout(() => {
-                    if (result.run_id) {
-                        window.location.href = `/results/${result.run_id}`;
-                    } else {
-                        window.location.href = '/results';
-                    }
-                }, 2000);
+            if (result.status === 'accepted' && result.job_id) {
+                currentJobId = result.job_id;
+                appendProgressLog('Job accepted. Preparing analysis...');
+                startPollingStatus(currentJobId);
+            } else if (result.status === 'success' && result.run_id) {
+                appendProgressLog(result.message || 'Analysis completed. Redirecting to results...');
+                progressBar.style.width = '100%';
+                progressText.textContent = 'Completed';
+                setTimeout(() => window.location.href = `/results/${result.run_id}`, 1500);
             } else {
-                throw new Error(result.message || 'Analysis failed');
+                throw new Error(result.message || 'Analysis failed to start.');
             }
-            
         } catch (error) {
             showToast('Failed to start analysis: ' + error.message, 'error');
-            this.style.display = 'block';
-            document.getElementById('progressSection').classList.add('hidden');
+            resetProgressUI();
         }
     });
     
-    function updateProgress(percentage, message) {
-        document.getElementById('progressText').textContent = percentage + '%';
-        document.getElementById('progressBar').style.width = percentage + '%';
-        
-        if (message) {
-            const log = document.getElementById('progressLog');
-            const entry = document.createElement('div');
-            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-            log.appendChild(entry);
-            log.scrollTop = log.scrollHeight;
+    function startPollingStatus(jobId) {
+        if (jobPollHandle) {
+            clearInterval(jobPollHandle);
+        }
+        fetchJobStatus(jobId);
+        jobPollHandle = setInterval(() => fetchJobStatus(jobId), 2000);
+    }
+    
+    async function fetchJobStatus(jobId) {
+        try {
+            const response = await fetch(`/api/analyze/status/${jobId}`);
+            if (!response.ok) {
+                throw new Error('Unable to fetch job status');
+            }
+            
+            const status = await response.json();
+            renderProgress(status);
+            
+            if (status.status === 'completed' && status.run_id) {
+                clearInterval(jobPollHandle);
+                appendProgressLog('Analysis complete. Redirecting to results...');
+                setTimeout(() => window.location.href = `/results/${status.run_id}`, 1500);
+            } else if (status.status === 'failed') {
+                clearInterval(jobPollHandle);
+                showToast(status.error || 'Analysis failed.', 'error');
+                appendProgressLog(status.error || 'Analysis failed.');
+                resetProgressUI(true);
+            }
+        } catch (error) {
+            appendProgressLog('Waiting for next update...');
         }
     }
     
-    // Progress simulation
-    function simulateProgress() {
-        let progress = 0;
-        const messages = [
-            'Initializing analysis...',
-            'Fetching eligible titles...',
-            'Downloading poster images...',
-            'Running AI analysis...',
-            'Processing results...',
-            'Saving to database...'
-        ];
+    function renderProgress(status) {
+        const processed = status.processed || 0;
+        const total = status.total || status.processed || 0;
+        const percentage = total ? Math.min(100, Math.round((processed / total) * 100)) : 0;
         
-        let messageIndex = 0;
-        const progressInterval = setInterval(() => {
-            if (document.getElementById('progressSection').classList.contains('hidden')) {
-                clearInterval(progressInterval);
-                return;
-            }
-            
-            progress += Math.random() * 20;
-            if (progress > 90) progress = 90;
-            
-            if (progress > messageIndex * 15 && messageIndex < messages.length) {
-                updateProgress(Math.floor(progress), messages[messageIndex]);
-                messageIndex++;
-            }
-        }, 800);
-        
-        return progressInterval;
+        progressText.textContent = total ? `${processed}/${total}` : `${processed}`;
+        progressBar.style.width = `${percentage}%`;
+        renderLogs(status.logs || []);
+    }
+    
+    function renderLogs(logs) {
+        progressLog.innerHTML = '';
+        logs.forEach(entry => {
+            const div = document.createElement('div');
+            div.textContent = `[${new Date(entry.timestamp).toLocaleTimeString()}] ${entry.message}`;
+            progressLog.appendChild(div);
+        });
+        progressLog.scrollTop = progressLog.scrollHeight;
+    }
+    
+    function appendProgressLog(message) {
+        const entry = document.createElement('div');
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        progressLog.appendChild(entry);
+        progressLog.scrollTop = progressLog.scrollHeight;
+    }
+    
+    function resetProgressUI(keepLogs = false) {
+        if (jobPollHandle) {
+            clearInterval(jobPollHandle);
+            jobPollHandle = null;
+        }
+        analysisForm.style.display = 'block';
+        progressSection.classList.add('hidden');
+        progressBar.style.width = '0%';
+        progressText.textContent = '0%';
+        if (!keepLogs) {
+            progressLog.innerHTML = '';
+        }
     }
 </script>
 {% endblock %}

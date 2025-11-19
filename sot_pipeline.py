@@ -3,14 +3,14 @@ import json
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass, field
 
 import structlog
 
 from config import DatabricksConfig, get_config
 from service import ContentService, EligibleTitlesService
-from analysis import SafeZoneAnalyzer, PosterAnalysisPipeline, PosterAnalysisResult
+from analysis import SafeZoneAnalyzer
 from sot_repository import EligibleTitle
 
 logger = structlog.get_logger(__name__)
@@ -120,6 +120,7 @@ class SOTAnalysisPipeline:
         download_timeout: int = 20,
         save_composite_images: bool = False,
         composite_image_dir: str = "./debug_composite_images",
+        progress_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
     ) -> List[SOTAnalysisResult]:
         """
         Run analysis on eligible titles.
@@ -135,9 +136,44 @@ class SOTAnalysisPipeline:
             save_composite_images: Whether to save composite images with red zone overlay for debugging
             composite_image_dir: Directory to save composite images (default: ./debug_composite_images)
             
+        Args:
+            progress_callback: Optional callable to receive progress updates with keys
+                (event, processed, total, message, etc.)
+        
         Returns:
             List of analysis results
         """
+        checkpoint: Optional[SOTAnalysisCheckpoint] = None
+
+        def report_progress(event: str, result: Optional[SOTAnalysisResult] = None, message: Optional[str] = None):
+            if not progress_callback:
+                return
+            
+            payload: Dict[str, Any] = {
+                "event": event,
+                "processed": checkpoint.processed_count if checkpoint else 0,
+                "success": checkpoint.success_count if checkpoint else 0,
+                "errors": checkpoint.error_count if checkpoint else 0,
+                "total": limit,
+            }
+            if message:
+                payload["message"] = message
+            
+            if result:
+                payload.update(
+                    content_id=result.content_id,
+                    content_name=result.content_name,
+                    sot_name=result.sot_name,
+                    has_key_elements=None,
+                )
+                if result.analysis:
+                    red_zone = result.analysis.get("red_safe_zone", {})
+                    payload["has_key_elements"] = red_zone.get("contains_key_elements")
+                    payload["confidence"] = red_zone.get("confidence")
+                if result.error:
+                    payload["error"] = result.error
+            progress_callback(payload)
+        
         # Load checkpoint if resuming
         checkpoint = None
         processed_set = set()
@@ -172,6 +208,10 @@ class SOTAnalysisPipeline:
         print(f"📊 Limit: {limit if limit else 'No limit'}")
         print(f"💾 Save composite images: {save_composite_images}")
         print(f"{'='*70}\n")
+        report_progress(
+            event="started",
+            message=f"Starting analysis for {limit or 'unknown'} titles",
+        )
         
         logger.info(
             "fetching_eligible_titles_pipeline",
@@ -180,6 +220,7 @@ class SOTAnalysisPipeline:
         )
         
         print("🔍 Fetching eligible titles from database...")
+        report_progress("fetching_titles", message="Fetching eligible titles from database...")
         eligible_gen = self.eligible_service.iter_eligible_poster_images(
             days_back=days_back,
             sot_types=sot_types,
@@ -188,9 +229,27 @@ class SOTAnalysisPipeline:
         )
         
         # Process titles
-        results = []
-        batch = []
+        results: List[SOTAnalysisResult] = []
+        batch: List[EligibleTitle] = []
         start_time = time.time()
+        
+        def handle_result(result: SOTAnalysisResult) -> None:
+            checkpoint.processed_count += 1
+            checkpoint.processed_ids.append(result.content_id)
+            
+            if result.error:
+                checkpoint.error_count += 1
+                checkpoint.errors[result.content_id] = result.error
+            else:
+                checkpoint.success_count += 1
+            
+            results.append(result)
+            
+            human_name = result.content_name or f"ID {result.content_id}"
+            progress_message = f"Processed {human_name} ({checkpoint.processed_count}/{limit or '∞'})"
+            if result.error:
+                progress_message += f" - error: {result.error}"
+            report_progress("processed", result=result, message=progress_message)
         
         for eligible_title in eligible_gen:
             # Skip if already processed
@@ -201,7 +260,7 @@ class SOTAnalysisPipeline:
             
             # Process batch when full
             if len(batch) >= batch_size:
-                batch_results = self._process_batch(
+                self._process_batch(
                     batch,
                     download_images=download_images,
                     download_timeout=download_timeout,
@@ -210,20 +269,8 @@ class SOTAnalysisPipeline:
                     current_count=checkpoint.processed_count,
                     total_limit=limit,
                     start_time=start_time,
+                    on_result=handle_result,
                 )
-                
-                # Update checkpoint
-                for result in batch_results:
-                    checkpoint.processed_count += 1
-                    checkpoint.processed_ids.append(result.content_id)
-                    
-                    if result.error:
-                        checkpoint.error_count += 1
-                        checkpoint.errors[result.content_id] = result.error
-                    else:
-                        checkpoint.success_count += 1
-                    
-                    results.append(result)
                 
                 # Save checkpoint
                 checkpoint.last_updated = datetime.now()
@@ -263,7 +310,7 @@ class SOTAnalysisPipeline:
         
         # Process remaining batch
         if batch:
-            batch_results = self._process_batch(
+            self._process_batch(
                 batch,
                 download_images=download_images,
                 download_timeout=download_timeout,
@@ -272,19 +319,8 @@ class SOTAnalysisPipeline:
                 current_count=checkpoint.processed_count,
                 total_limit=limit,
                 start_time=start_time,
+                on_result=handle_result,
             )
-            
-            for result in batch_results:
-                checkpoint.processed_count += 1
-                checkpoint.processed_ids.append(result.content_id)
-                
-                if result.error:
-                    checkpoint.error_count += 1
-                    checkpoint.errors[result.content_id] = result.error
-                else:
-                    checkpoint.success_count += 1
-                
-                results.append(result)
             
             checkpoint.last_updated = datetime.now()
             checkpoint.save(self.checkpoint_path)
@@ -310,6 +346,11 @@ class SOTAnalysisPipeline:
             avg_time = duration_seconds / checkpoint.success_count
             print(f"📈 Avg time per poster: {avg_time:.1f} seconds")
         print(f"{'='*70}\n")
+        completion_message = (
+            f"Analysis complete in {duration_minutes:.1f} minutes. "
+            f"{checkpoint.success_count} success, {checkpoint.error_count} errors."
+        )
+        report_progress("completed", message=completion_message)
         
         logger.info(
             "sot_analysis_complete",
@@ -331,29 +372,21 @@ class SOTAnalysisPipeline:
         current_count: int = 0,
         total_limit: Optional[int] = None,
         start_time: Optional[float] = None,
-    ) -> List[SOTAnalysisResult]:
+        on_result: Optional[Callable[[SOTAnalysisResult], None]] = None,
+    ) -> None:
         """Process a batch of eligible titles."""
-        results = []
-        
-        # Create poster analysis pipeline
-        pipeline = PosterAnalysisPipeline(self.content_service, self.analyzer)
         
         # Import needed modules
         import os
         import re
         import base64
-        from analysis import _download_image_to_base64, PosterAnalysisResult
+        from analysis import _download_image_to_base64
         
         # Create composite image directory if needed
         if save_composite_images:
             os.makedirs(composite_image_dir, exist_ok=True)
             print(f"📸 Composite images will be saved to: {composite_image_dir}")
-        
-        # Map content IDs to eligible titles (content_id might be same as program_id)
-        content_map = {t.content_id if t.content_id else t.program_id: t for t in batch}
-        
         # Analyze specific posters
-        analysis_results = []
         batch_item_count = 0
         for t in batch:
             if not t.poster_img_url:
@@ -407,12 +440,18 @@ class SOTAnalysisPipeline:
                 else:
                     print(f"   {status} (confidence: {confidence}%)\n")
                 
-                analysis_results.append(PosterAnalysisResult(
+                sot_result = SOTAnalysisResult(
                     content_id=content_id,
+                    program_id=t.program_id,
+                    sot_name=t.sot_name,
+                    content_name=t.content_name,
+                    content_type=t.content_type,
                     poster_img_url=t.poster_img_url,
                     analysis=result,
-                    error=None
-                ))
+                    error=None,
+                )
+                if on_result:
+                    on_result(sot_result)
                 
                 batch_item_count += 1
                 
@@ -424,33 +463,22 @@ class SOTAnalysisPipeline:
                 )
                 print(f"   ❌ ERROR: {str(e)}\n")
                 
-                analysis_results.append(PosterAnalysisResult(
+                sot_result = SOTAnalysisResult(
                     content_id=content_id,
+                    program_id=t.program_id,
+                    sot_name=t.sot_name,
+                    content_name=t.content_name,
+                    content_type=t.content_type,
                     poster_img_url=t.poster_img_url,
                     analysis=None,
-                    error=str(e)
-                ))
+                    error=str(e),
+                )
+                if on_result:
+                    on_result(sot_result)
                 
                 batch_item_count += 1
         
-        # Convert to SOT results
-        for analysis_result in analysis_results:
-            eligible_title = content_map.get(analysis_result.content_id)
-            
-            if eligible_title:
-                sot_result = SOTAnalysisResult(
-                    content_id=analysis_result.content_id,
-                    program_id=eligible_title.program_id,
-                    sot_name=eligible_title.sot_name,
-                    content_name=eligible_title.content_name,
-                    content_type=eligible_title.content_type,
-                    poster_img_url=analysis_result.poster_img_url,
-                    analysis=analysis_result.analysis,
-                    error=analysis_result.error,
-                )
-                results.append(sot_result)
-        
-        return results
+        return None
     
     def get_summary_by_sot(self, results: List[SOTAnalysisResult]) -> Dict[str, Dict[str, Any]]:
         """

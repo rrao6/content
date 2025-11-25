@@ -11,6 +11,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 try:
     from sot_pipeline import SOTAnalysisPipeline, SOTAnalysisResult
+    from sot_pipeline_parallel import ParallelSOTAnalysisPipeline
     from service import EligibleTitlesService
     from config import get_config
     from database import AnalysisRun, PosterResult
@@ -18,6 +19,7 @@ except ImportError as e:
     print(f"Warning: Could not import analysis modules: {e}")
     print("Dashboard will run in view-only mode")
     SOTAnalysisPipeline = None
+    ParallelSOTAnalysisPipeline = None
     EligibleTitlesService = None
 
 
@@ -25,7 +27,7 @@ class DashboardAnalyzer:
     """Wrapper for running analysis from the dashboard."""
     
     # Safety limits for QA
-    MAX_BATCH_SIZE = 200
+    MAX_BATCH_SIZE = 10000  # Increased for production runs
     DEFAULT_BATCH_SIZE = 50
     VALID_SOTS = {
         "imdb",
@@ -70,11 +72,26 @@ class DashboardAnalyzer:
                     model=self.config.openai_model,
                     api_key=self.config.openai_api_key
                 )
-                self.pipeline = SOTAnalysisPipeline(
-                    eligible_service=self.service,
-                    content_service=content_service,
-                    analyzer=analyzer
-                )
+                
+                # Use parallel pipeline for better performance
+                if ParallelSOTAnalysisPipeline:
+                    # Determine max workers based on rate limit
+                    max_workers = min(10, max(3, self.config.vision_requests_per_minute // 10))
+                    self.pipeline = ParallelSOTAnalysisPipeline(
+                        eligible_service=self.service,
+                        content_service=content_service,
+                        analyzer=analyzer,
+                        max_workers=max_workers
+                    )
+                    print(f"✅ Using parallel pipeline with {max_workers} workers")
+                else:
+                    self.pipeline = SOTAnalysisPipeline(
+                        eligible_service=self.service,
+                        content_service=content_service,
+                        analyzer=analyzer
+                    )
+                    print("⚠️ Using sequential pipeline (parallel not available)")
+                    
             except Exception as e:
                 print(f"Warning: Could not initialize analysis pipeline: {e}")
     
@@ -100,11 +117,18 @@ class DashboardAnalyzer:
                 "message": "Analysis pipeline not available"
             }
         
+        # Validate input SOT types
+        if not sot_types or not isinstance(sot_types, list) or len(sot_types) == 0:
+            return {
+                "status": "error",
+                "message": "Please select at least one Source of Truth type."
+            }
+        
         normalized_sots = self._normalize_sot_types(sot_types)
         if not normalized_sots:
             return {
                 "status": "error",
-                "message": "No valid Source of Truth selections were provided."
+                "message": "No valid Source of Truth selections were provided. Valid options: " + ", ".join(self.get_available_sots())
             }
         
         # Enforce batch size limits for QA
@@ -135,7 +159,7 @@ class DashboardAnalyzer:
             
             # Calculate statistics
             total = len(results)
-            passed = sum(1 for r in results if not r.analysis.get("red_safe_zone", {}).get("contains_key_elements", True))
+            passed = sum(1 for r in results if r.analysis and not r.analysis.get("red_safe_zone", {}).get("contains_key_elements", True))
             failed = total - passed
             
             # Create analysis run in database
@@ -251,3 +275,11 @@ def run_dashboard_analysis(**kwargs) -> Dict[str, Any]:
 def get_sot_types() -> List[str]:
     """Get available SOT types."""
     return analyzer.get_available_sot_types()
+
+
+def get_max_workers() -> int:
+    """Get the maximum number of parallel workers."""
+    if hasattr(analyzer, 'pipeline') and hasattr(analyzer.pipeline, 'max_workers'):
+        return analyzer.pipeline.max_workers
+    # Default based on typical rate limits
+    return 10

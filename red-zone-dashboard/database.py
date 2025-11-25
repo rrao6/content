@@ -293,6 +293,8 @@ class PosterResult:
                 "total": total,
                 "passed": passed,
                 "failed": total - passed,
+                "pass_count": passed,  # Added for compatibility
+                "fail_count": total - passed,  # Added for compatibility
                 "fail_rate": (total - passed) / total * 100 if total > 0 else 0,
                 "avg_confidence": round(avg_confidence, 1),
                 "by_sot": sot_stats

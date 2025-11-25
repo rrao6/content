@@ -1,0 +1,360 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Red Zone Analysis{% endblock %}
+
+{% block content %}
+<div class="px-4 py-5 sm:px-6">
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">
+            <i class="fas fa-chart-bar mr-2"></i>
+            Analytics Dashboard
+        </h2>
+        <p class="text-gray-600">Comprehensive analysis insights and trends</p>
+    </div>
+    
+    <!-- Key Metrics Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <!-- Total Analyzed -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <dt class="text-sm font-medium text-gray-500 truncate">
+                    Total Posters Analyzed
+                </dt>
+                <dd class="mt-1 text-3xl font-semibold text-gray-900">
+                    {{ "{:,}".format(stats.total|default(0)) }}
+                </dd>
+                <p class="mt-2 text-sm">
+                    <span class="text-green-600">
+                        <i class="fas fa-arrow-up"></i> {{ stats.growth_rate|default(0) }}%
+                    </span>
+                    <span class="text-gray-500">vs last week</span>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Overall Pass Rate -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <dt class="text-sm font-medium text-gray-500 truncate">
+                    Overall Pass Rate
+                </dt>
+                <dd class="mt-1 text-3xl font-semibold text-green-600">
+                    {{ (100 - stats.fail_rate)|default(0)|round(1) }}%
+                </dd>
+                <div class="mt-2">
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-green-600 h-2 rounded-full" style="width: {{ 100 - stats.fail_rate|default(0) }}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Average Confidence -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <dt class="text-sm font-medium text-gray-500 truncate">
+                    Average Confidence
+                </dt>
+                <dd class="mt-1 text-3xl font-semibold text-blue-600">
+                    {{ stats.avg_confidence|default(0)|round(1) }}%
+                </dd>
+                <p class="mt-2 text-sm text-gray-500">
+                    High: {{ stats.high_confidence_count|default(0) }} (≥90%)
+                </p>
+            </div>
+        </div>
+        
+        <!-- Active Runs -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <dt class="text-sm font-medium text-gray-500 truncate">
+                    Analysis Runs
+                </dt>
+                <dd class="mt-1 text-3xl font-semibold text-gray-900">
+                    {{ total_runs|default(0) }}
+                </dd>
+                <p class="mt-2 text-sm text-gray-500">
+                    Last 30 days: {{ recent_runs_count|default(0) }}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SOT Performance Chart -->
+    <div class="bg-white shadow rounded-lg p-6 mb-8">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Performance by Source of Truth</h3>
+        <div class="mb-4">
+            <canvas id="sotPerformanceChart" height="80"></canvas>
+        </div>
+        
+        <!-- SOT Details Table -->
+        <div class="mt-6">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Source of Truth
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Total
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Pass Rate
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Avg Confidence
+                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Trend
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for sot in sot_stats %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">
+                                {{ sot.name|title|replace('_', ' ') }}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ "{:,}".format(sot.total) }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if sot.pass_rate > 75 %}bg-green-100 text-green-800{% elif sot.pass_rate > 50 %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ sot.pass_rate|round(1) }}%
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ sot.avg_confidence|round(1) }}%
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            {% if sot.trend > 0 %}
+                                <span class="text-green-600">
+                                    <i class="fas fa-arrow-up"></i> {{ sot.trend }}%
+                                </span>
+                            {% elif sot.trend < 0 %}
+                                <span class="text-red-600">
+                                    <i class="fas fa-arrow-down"></i> {{ abs(sot.trend) }}%
+                                </span>
+                            {% else %}
+                                <span class="text-gray-500">
+                                    <i class="fas fa-minus"></i> 0%
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Time-based Analysis -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- Daily Trends -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Daily Analysis Volume</h3>
+            <canvas id="dailyTrendsChart" height="200"></canvas>
+        </div>
+        
+        <!-- Pass/Fail Distribution -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Pass/Fail Distribution</h3>
+            <canvas id="passFailChart" height="200"></canvas>
+        </div>
+    </div>
+    
+    <!-- Data Quality Metrics -->
+    <div class="bg-white shadow rounded-lg p-6 mb-8">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">
+            <i class="fas fa-shield-alt mr-2"></i>
+            Data Quality Metrics
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Duplicate Check -->
+            <div class="border rounded-lg p-4">
+                <h4 class="font-medium text-gray-900">Duplicate Prevention</h4>
+                <div class="mt-2">
+                    {% if quality_metrics.duplicates == 0 %}
+                        <span class="text-2xl font-bold text-green-600">✓</span>
+                        <p class="text-sm text-gray-500 mt-1">No duplicates detected</p>
+                    {% else %}
+                        <span class="text-2xl font-bold text-red-600">{{ quality_metrics.duplicates }}</span>
+                        <p class="text-sm text-gray-500 mt-1">Duplicates found</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Data Consistency -->
+            <div class="border rounded-lg p-4">
+                <h4 class="font-medium text-gray-900">Data Consistency</h4>
+                <div class="mt-2">
+                    <span class="text-2xl font-bold text-blue-600">{{ quality_metrics.consistency_score|default(100) }}%</span>
+                    <p class="text-sm text-gray-500 mt-1">Consistency score</p>
+                </div>
+            </div>
+            
+            <!-- Completion Rate -->
+            <div class="border rounded-lg p-4">
+                <h4 class="font-medium text-gray-900">Analysis Completion</h4>
+                <div class="mt-2">
+                    <span class="text-2xl font-bold text-green-600">{{ quality_metrics.completion_rate|default(100) }}%</span>
+                    <p class="text-sm text-gray-500 mt-1">Success rate</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quality Recommendations -->
+        {% if quality_metrics.recommendations %}
+        <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h4 class="text-sm font-medium text-blue-900 mb-2">
+                <i class="fas fa-info-circle mr-1"></i>
+                Quality Recommendations
+            </h4>
+            <ul class="text-sm text-blue-700 space-y-1">
+                {% for rec in quality_metrics.recommendations %}
+                <li>• {{ rec }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Export Options -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">
+            <i class="fas fa-download mr-2"></i>
+            Export Analytics Data
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button onclick="exportAnalytics('json')" class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <i class="fas fa-file-code mr-2"></i>
+                Export as JSON
+            </button>
+            
+            <button onclick="exportAnalytics('csv')" class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <i class="fas fa-file-csv mr-2"></i>
+                Export as CSV
+            </button>
+            
+            <button onclick="exportAnalytics('pdf')" class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <i class="fas fa-file-pdf mr-2"></i>
+                Generate PDF Report
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+// Format numbers with commas
+Handlebars.registerHelper('format_number', function(num) {
+    return (num || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+});
+
+// SOT Performance Chart
+const sotCtx = document.getElementById('sotPerformanceChart').getContext('2d');
+const sotChart = new Chart(sotCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ sot_labels|tojson }},
+        datasets: [{
+            label: 'Pass Rate (%)',
+            data: {{ sot_pass_rates|tojson }},
+            backgroundColor: 'rgba(34, 197, 94, 0.5)',
+            borderColor: 'rgb(34, 197, 94)',
+            borderWidth: 1
+        }, {
+            label: 'Average Confidence (%)',
+            data: {{ sot_confidences|tojson }},
+            backgroundColor: 'rgba(59, 130, 246, 0.5)',
+            borderColor: 'rgb(59, 130, 246)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100
+            }
+        }
+    }
+});
+
+// Daily Trends Chart
+const dailyCtx = document.getElementById('dailyTrendsChart').getContext('2d');
+const dailyChart = new Chart(dailyCtx, {
+    type: 'line',
+    data: {
+        labels: {{ daily_labels|tojson }},
+        datasets: [{
+            label: 'Posters Analyzed',
+            data: {{ daily_counts|tojson }},
+            fill: true,
+            borderColor: 'rgb(99, 102, 241)',
+            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+            tension: 0.1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+
+// Pass/Fail Distribution Chart
+const passFailCtx = document.getElementById('passFailChart').getContext('2d');
+const passFailChart = new Chart(passFailCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Pass', 'Fail'],
+        datasets: [{
+            data: [{{ pass_count|default(0) }}, {{ fail_count|default(0) }}],
+            backgroundColor: [
+                'rgba(34, 197, 94, 0.8)',
+                'rgba(239, 68, 68, 0.8)'
+            ],
+            borderColor: [
+                'rgb(34, 197, 94)',
+                'rgb(239, 68, 68)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Export functions
+function exportAnalytics(format) {
+    window.location.href = `/api/analytics/export?format=${format}`;
+}
+
+// Auto-refresh if analysis is running
+setInterval(function() {
+    fetch('/api/analyze/active')
+        .then(response => response.json())
+        .then(data => {
+            if (data.active) {
+                // Refresh page to show latest data
+                setTimeout(() => window.location.reload(), 5000);
+            }
+        });
+}, 10000);
+</script>
+{% endblock %}

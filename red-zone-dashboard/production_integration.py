@@ -137,8 +137,8 @@ class ProductionDashboardIntegration:
                 for result in results[:3]:
                     red_zone = result.analysis.get("red_safe_zone", {})
                     status = "FAIL" if red_zone.get("contains_key_elements") else "PASS"
-                    print(f"   - {result.eligible_title.title}: {status} ({red_zone.get('confidence')}%)")
-                    print(f"     Poster: {result.poster_image.url if result.poster_image else 'N/A'}")
+                    print(f"   - {result.content_name}: {status} ({red_zone.get('confidence')}%)")
+                    print(f"     Poster: {result.poster_img_url or 'N/A'}")
                     print(f"     Justification: {red_zone.get('justification', 'N/A')}")
             
             return results
@@ -173,17 +173,14 @@ class ProductionDashboardIntegration:
         # Convert results for database
         db_results = []
         for result in results:
-            eligible = result.eligible_title
-            analysis = result.analysis
-            
             db_results.append({
-                "content_id": eligible.content_id,
-                "program_id": eligible.program_id,
-                "title": eligible.title,
-                "content_type": eligible.content_type,
-                "sot_name": eligible.sot_name,
-                "poster_url": result.poster_image.url if result.poster_image else eligible.poster_img_url,
-                "analysis": analysis
+                "content_id": result.content_id,
+                "program_id": result.program_id,
+                "title": result.content_name,
+                "content_type": result.content_type,
+                "sot_name": result.sot_name,
+                "poster_url": result.poster_img_url,
+                "analysis": result.analysis
             })
         
         # Save to database

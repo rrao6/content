@@ -154,6 +154,13 @@ WITH params AS (
     SELECT program_id, sot_name FROM just_added_sot""")
     
     # Join all unions
+    if not unions:
+        # If no SOT types selected, return empty result
+        return """
+SELECT NULL::bigint AS program_id,
+       NULL::varchar AS sot_name
+WHERE 1=0"""
+    
     query += "\n    UNION ALL\n".join(unions)
     
     query += """
@@ -176,23 +183,36 @@ def get_eligible_titles_with_content_query(
     base_query = get_eligible_titles_query(start_date, end_date, sot_types)
     
     # Wrap the base query and join with content_info
+    # Use ROW_NUMBER to get only one entry per content_id to avoid duplicates
     return f"""
 WITH eligible_titles AS (
 {base_query}
+),
+titles_with_rank AS (
+    SELECT 
+        et.program_id,
+        et.sot_name,
+        ci.content_id,
+        ci.content_name,
+        ci.content_type,
+        ci.poster_img_url,
+        ROW_NUMBER() OVER (PARTITION BY ci.content_id ORDER BY et.sot_name) as rn
+    FROM eligible_titles et
+    JOIN core_prod.tubidw.content_info ci
+        ON et.program_id = ci.content_id
+    WHERE ci.poster_img_url IS NOT NULL
+        AND ci.active = true
 )
-SELECT DISTINCT 
-    et.program_id,
-    et.sot_name,
-    ci.content_id,
-    ci.content_name,
-    ci.content_type,
-    ci.poster_img_url
-FROM eligible_titles et
-JOIN core_prod.tubidw.content_info ci
-    ON et.program_id = ci.content_id
-WHERE ci.poster_img_url IS NOT NULL
-    AND ci.active = true
-ORDER BY et.sot_name, et.program_id"""
+SELECT 
+    program_id,
+    sot_name,
+    content_id,
+    content_name,
+    content_type,
+    poster_img_url
+FROM titles_with_rank
+WHERE rn = 1
+ORDER BY sot_name, program_id"""
 
 
 def get_eligible_titles_count_query(
@@ -229,24 +249,36 @@ def get_shiny_eligible_titles_with_content_query(
     base_query = get_eligible_titles_query(start_date, end_date, sot_types)
     
     # Wrap the base query and join with content_info + shiny filter
+    # Use ROW_NUMBER to get only one entry per content_id to avoid duplicates
     return f"""
 WITH eligible_titles AS (
 {base_query}
+),
+shiny_titles_with_rank AS (
+    SELECT 
+        et.program_id,
+        et.sot_name,
+        ci.content_id,
+        ci.content_name,
+        ci.content_type,
+        ci.poster_img_url,
+        CASE WHEN LOWER(ci.tags) LIKE '%shiny%' THEN 1 ELSE 0 END as is_cms_shiny,
+        ROW_NUMBER() OVER (PARTITION BY ci.content_id ORDER BY et.sot_name) as rn
+    FROM eligible_titles et
+    JOIN core_prod.tubidw.content_info ci
+        ON et.program_id = ci.content_id
+    WHERE ci.poster_img_url IS NOT NULL
+        AND ci.active = true
+        AND LOWER(ci.tags) LIKE '%shiny%'
 )
-SELECT DISTINCT 
-    et.program_id,
-    et.sot_name,
-    ci.content_id,
-    ci.content_name,
-    ci.content_type,
-    ci.poster_img_url,
-    p.is_cms_shiny
-FROM eligible_titles et
-JOIN core_prod.tubidw.content_info ci
-    ON et.program_id = ci.content_id
-JOIN core_prod.dsa.dsac_program_info p
-    ON et.program_id = p.program_id
-WHERE ci.poster_img_url IS NOT NULL
-    AND ci.active = true
-    AND p.is_cms_shiny = 1
-ORDER BY et.program_id"""
+SELECT 
+    program_id,
+    sot_name,
+    content_id,
+    content_name,
+    content_type,
+    poster_img_url,
+    is_cms_shiny
+FROM shiny_titles_with_rank
+WHERE rn = 1
+ORDER BY program_id"""

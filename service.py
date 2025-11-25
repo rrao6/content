@@ -65,8 +65,13 @@ class EligibleTitlesService:
         repository: Optional[SOTRepository] = None,
         config: Optional[DatabricksConfig] = None
     ) -> None:
-        self.repository = repository or SOTRepository()
+        # If a config is passed as the first argument (common mistake), use it
+        if isinstance(repository, DatabricksConfig):
+            config = repository
+            repository = None
+        
         self.config = config or get_config()
+        self.repository = repository or SOTRepository()
         # Build cache with TTL from config
         cache_ttl_seconds = getattr(self.config, 'sot_cache_ttl_hours', 1) * 3600
         self._cache = TTLCache(maxsize=100, ttl=cache_ttl_seconds)

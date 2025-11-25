@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}Performance Metrics - Red Zone Analysis{% endblock %}
+
+{% block content %}
+<div class="px-4 py-5 sm:px-6">
+    <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">
+            <i class="fas fa-tachometer-alt mr-2"></i>
+            Performance Metrics
+        </h2>
+        <p class="text-gray-600">Real-time analysis performance and optimization insights</p>
+    </div>
+    
+    <!-- Current Performance Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <!-- Processing Rate -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <dt class="text-sm font-medium text-gray-500 truncate">
+                    Current Rate
+                </dt>
+                <dd class="mt-1 text-3xl font-semibold text-gray-900">
+                    <span id="currentRate">{{ current_rate|default(0) }}</span>
+                    <span class="text-sm font-medium text-gray-500">/min</span>
+                </dd>
+                <p class="mt-2 text-sm text-gray-500">
+                    <span class="text-green-600">
+                        <i class="fas fa-arrow-up"></i> {{ rate_improvement|default(0) }}% faster
+                    </span>
+                    with parallel processing
+                </p>
+            </div>
+        </div>
+        
+        <!-- Average Time -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <dt class="text-sm font-medium text-gray-500 truncate">
+                    Avg Time/Poster
+                </dt>
+                <dd class="mt-1 text-3xl font-semibold text-gray-900">
+                    <span id="avgTime">{{ avg_time|default(0) }}</span>
+                    <span class="text-sm font-medium text-gray-500">sec</span>
+                </dd>
+                <p class="mt-2 text-sm text-gray-500">
+                    Target: &lt;1 second
+                </p>
+            </div>
+        </div>
+        
+        <!-- Success Rate -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <dt class="text-sm font-medium text-gray-500 truncate">
+                    Success Rate
+                </dt>
+                <dd class="mt-1 text-3xl font-semibold text-gray-900">
+                    <span id="successRate">{{ success_rate|default(0) }}</span>%
+                </dd>
+                <p class="mt-2 text-sm text-gray-500">
+                    Last {{ total_processed|default(0) }} posters
+                </p>
+            </div>
+        </div>
+        
+        <!-- Parallel Workers -->
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <dt class="text-sm font-medium text-gray-500 truncate">
+                    Active Workers
+                </dt>
+                <dd class="mt-1 text-3xl font-semibold text-gray-900">
+                    <span id="activeWorkers">{{ active_workers|default(1) }}</span>
+                    <span class="text-sm font-medium text-gray-500">threads</span>
+                </dd>
+                <p class="mt-2 text-sm text-gray-500">
+                    Max: {{ max_workers|default(10) }} workers
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Performance Chart -->
+    <div class="bg-white shadow rounded-lg p-6 mb-8">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Processing Rate Over Time</h3>
+        <canvas id="performanceChart" height="100"></canvas>
+    </div>
+    
+    <!-- Optimization Suggestions -->
+    <div class="bg-white shadow rounded-lg p-6 mb-8">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">
+            <i class="fas fa-lightbulb mr-2"></i>
+            Optimization Recommendations
+        </h3>
+        
+        <div class="space-y-4">
+            <!-- Rate Limit Optimization -->
+            <div class="border-l-4 border-blue-400 bg-blue-50 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-blue-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-blue-700">
+                            <strong>Increase API Rate Limit:</strong>
+                            Current limit is {{ rate_limit|default(30) }} req/min. 
+                            Consider upgrading OpenAI tier for 120+ req/min.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Worker Optimization -->
+            {% if active_workers < max_workers %}
+            <div class="border-l-4 border-yellow-400 bg-yellow-50 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-yellow-700">
+                            <strong>Increase Worker Threads:</strong>
+                            Currently using {{ active_workers }} of {{ max_workers }} available workers.
+                            Increase batch size to utilize more workers.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Cache Optimization -->
+            <div class="border-l-4 border-green-400 bg-green-50 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-check-circle text-green-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-green-700">
+                            <strong>Cache Hit Rate:</strong>
+                            {{ cache_hit_rate|default(0) }}% of requests served from cache.
+                            {% if cache_hit_rate < 20 %}
+                            Enable caching to improve performance.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Batch Size Recommendations -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">
+            <i class="fas fa-layer-group mr-2"></i>
+            Recommended Batch Sizes
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="border rounded-lg p-4">
+                <h4 class="font-medium text-gray-900">Testing</h4>
+                <p class="text-2xl font-bold text-blue-600 mt-2">25-50</p>
+                <p class="text-sm text-gray-500 mt-1">
+                    1-2 minutes completion time
+                </p>
+            </div>
+            
+            <div class="border rounded-lg p-4">
+                <h4 class="font-medium text-gray-900">Production</h4>
+                <p class="text-2xl font-bold text-blue-600 mt-2">100-200</p>
+                <p class="text-sm text-gray-500 mt-1">
+                    5-10 minutes completion time
+                </p>
+            </div>
+            
+            <div class="border rounded-lg p-4">
+                <h4 class="font-medium text-gray-900">Large Scale</h4>
+                <p class="text-2xl font-bold text-blue-600 mt-2">500+</p>
+                <p class="text-sm text-gray-500 mt-1">
+                    20-30 minutes with checkpointing
+                </p>
+            </div>
+        </div>
+        
+        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+            <p class="text-sm text-gray-700">
+                <strong>Current Configuration:</strong><br>
+                • Parallel Workers: {{ max_workers|default(10) }}<br>
+                • Rate Limit: {{ rate_limit|default(30) }} requests/min<br>
+                • Estimated Max Throughput: {{ max_throughput|default(120) }} posters/min<br>
+                • Actual Throughput: {{ current_rate|default(0) }} posters/min
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+// Performance tracking data
+let performanceData = {
+    labels: [],
+    datasets: [{
+        label: 'Posters/Minute',
+        data: [],
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        tension: 0.1
+    }]
+};
+
+// Initialize performance chart
+const ctx = document.getElementById('performanceChart').getContext('2d');
+const performanceChart = new Chart(ctx, {
+    type: 'line',
+    data: performanceData,
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Processing Rate (posters/min)'
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Time'
+                }
+            }
+        }
+    }
+});
+
+// Update performance metrics every 5 seconds
+function updateMetrics() {
+    fetch('/api/performance/metrics')
+        .then(response => response.json())
+        .then(data => {
+            // Update display values
+            document.getElementById('currentRate').textContent = data.current_rate.toFixed(1);
+            document.getElementById('avgTime').textContent = data.avg_time.toFixed(1);
+            document.getElementById('successRate').textContent = data.success_rate.toFixed(1);
+            document.getElementById('activeWorkers').textContent = data.active_workers;
+            
+            // Update chart
+            const now = new Date().toLocaleTimeString();
+            performanceData.labels.push(now);
+            performanceData.datasets[0].data.push(data.current_rate);
+            
+            // Keep only last 20 data points
+            if (performanceData.labels.length > 20) {
+                performanceData.labels.shift();
+                performanceData.datasets[0].data.shift();
+            }
+            
+            performanceChart.update();
+        })
+        .catch(error => console.error('Error updating metrics:', error));
+}
+
+// Update metrics on page load and every 5 seconds
+updateMetrics();
+setInterval(updateMetrics, 5000);
+
+// Auto-refresh if analysis is running
+function checkActiveAnalysis() {
+    fetch('/api/analyze/active')
+        .then(response => response.json())
+        .then(data => {
+            if (data.active) {
+                // Refresh more frequently during active analysis
+                setTimeout(updateMetrics, 2000);
+            }
+        });
+}
+
+setInterval(checkActiveAnalysis, 10000);
+</script>
+{% endblock %}

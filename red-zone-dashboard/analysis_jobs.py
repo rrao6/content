@@ -121,6 +121,16 @@ def get_job_status(job_id: str) -> Optional[Dict[str, Any]]:
     return job.to_dict()
 
 
+def get_latest_active_job() -> Optional[Dict[str, Any]]:
+    """Get the latest active (running) job."""
+    with _JOB_LOCK:
+        for job_id in sorted(_JOBS.keys(), reverse=True):
+            job = _JOBS[job_id]
+            if job.status == 'running':
+                return job.to_dict()
+    return None
+
+
 def _run_job(job: AnalysisJob) -> None:
     """Worker that executes the analysis and tracks progress."""
     job.start()

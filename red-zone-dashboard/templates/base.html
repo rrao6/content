@@ -56,6 +56,16 @@
                            class="{% if request.endpoint == 'qa_guide' %}border-red-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                             QA Guide
                         </a>
+                        <a href="{{ url_for('analytics') }}" 
+                           class="{% if request.endpoint == 'analytics' %}border-red-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            <i class="fas fa-chart-bar mr-1"></i>
+                            Analytics
+                        </a>
+                        <a href="{{ url_for('performance') }}" 
+                           class="{% if request.endpoint == 'performance' %}border-red-500 text-gray-900{% else %}border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700{% endif %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            <i class="fas fa-tachometer-alt mr-1"></i>
+                            Performance
+                        </a>
                     </div>
                 </div>
                 <div class="flex items-center">
